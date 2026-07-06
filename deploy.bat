@@ -1,0 +1,3 @@
+@echo off
+echo Running Bookstore InsForge Deployment with absolute NPX path...
+"C:\Program Files\nodejs\npx.cmd" @insforge/cli deployments deploy --env "{\"MONGO_URI\":\"mongodb+srv://naralamanoj810_db_user:FGi7jXNGdu1uD4LU@cluster0.omhn6pi.mongodb.net/bookstore?retryWrites=true&w=majority&appName=Cluster0\",\"JWT_SECRET\":\"bookstore_jwt_secret_dev_2024\",\"JWT_REFRESH_SECRET\":\"bookstore_jwt_refresh_secret_dev_2024\",\"JWT_EXPIRE\":\"15m\",\"JWT_REFRESH_EXPIRE\":\"7d\",\"JWT_COOKIE_EXPIRE\":\"7\",\"NODE_ENV\":\"production\",\"VITE_API_URL\":\"/api\",\"EMAIL_HOST\":\"smtp.gmail.com\",\"EMAIL_PORT\":\"587\",\"EMAIL_USER\":\"manojnarala86@gmail.com\",\"EMAIL_PASS\":\"amvg pkft tpsi crir\"}" .

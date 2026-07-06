@@ -1,0 +1,33 @@
+node_modules/
+# .env commented out to allow deployment of SMTP config
+# .env
+.env.local
+.env.production
+dist/
+build/
+# uploads commented out to allow deployment of local book images
+# uploads/*
+# !uploads/.gitkeep
+logs/*
+!logs/.gitkeep
+*.log
+.DS_Store
+Thumbs.db
+coverage/
+.vscode/
+.idea/
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf

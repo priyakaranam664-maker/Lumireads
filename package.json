@@ -1,0 +1,22 @@
+{
+  "name": "bookstore",
+  "version": "1.0.0",
+  "description": "Enterprise MERN Stack Online BookStore Application",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm run dev --workspace=server",
+    "client": "npm run dev --workspace=client",
+    "build": "npm run build --workspace=client",
+    "start": "npm run start --workspace=server",
+    "seed": "npm run seed --workspace=server",
+    "lint": "eslint . --ext .js,.jsx"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
