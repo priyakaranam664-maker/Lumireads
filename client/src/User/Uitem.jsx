@@ -8,6 +8,7 @@ const Uitem = () => {
     const navigate = useNavigate();
     const [book, setBook] = useState(null);
     const [loading, setLoading] = useState(true);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     useEffect(() => {
         axios.get(`/api/books/${identifier}`).then(res => {
@@ -26,65 +27,86 @@ const Uitem = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Added to cart!');
+            navigate('/cart');
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to add to cart');
+            toast.error(error.response?.data?.message || 'Failed to checkout');
         }
     };
 
-    if (loading) return <div className="text-center py-5 text-muted" style={{ backgroundColor: '#F9F6F0', minHeight: '100vh' }}>Loading...</div>;
-    if (!book) return <div className="text-center py-5 text-muted" style={{ backgroundColor: '#F9F6F0', minHeight: '100vh' }}>Book not found.</div>;
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        navigate('/bookverse');
+    };
+
+    if (loading) return <div className="text-center py-5" style={{ backgroundColor: '#F4ECE1', minHeight: '100vh' }}>Loading...</div>;
+    if (!book) return <div className="text-center py-5" style={{ backgroundColor: '#F4ECE1', minHeight: '100vh' }}>Book not found.</div>;
 
     return (
-        <div style={{ backgroundColor: '#F9F6F0', minHeight: '100vh', fontFamily: 'Outfit, sans-serif' }}>
-            <nav className="navbar navbar-expand-lg px-4 py-3" style={{ backgroundColor: '#5D2E17' }}>
-                <span className="navbar-brand text-white fw-bold" style={{ fontSize: '1.4rem' }}>📚 BookVerse</span>
-                <div className="ms-auto d-flex align-items-center gap-3">
+        <div style={{ backgroundColor: '#F4ECE1', minHeight: '100vh', fontFamily: 'Outfit, sans-serif', pb: '50px' }}>
+            {/* Header */}
+            <nav className="navbar navbar-expand-lg px-4 py-3" style={{ backgroundColor: '#8B4513' }}>
+                <span className="navbar-brand text-white fw-bold" style={{ fontSize: '1.4rem', cursor: 'pointer' }} onClick={() => navigate('/user/home')}>
+                    BookStore
+                </span>
+                <div className="ms-auto d-flex align-items-center gap-4">
                     <span className="text-white fw-semibold" style={{ cursor: 'pointer' }} onClick={() => navigate('/user/home')}>Home</span>
-                    <span className="text-white fw-semibold" style={{ cursor: 'pointer' }} onClick={() => navigate('/user/products')}>Products</span>
+                    <span className="text-white fw-semibold" style={{ cursor: 'pointer' }} onClick={() => navigate('/user/products')}>Books</span>
+                    <span className="text-white fw-semibold" style={{ cursor: 'pointer' }} onClick={() => navigate('/wishlist')}>Wishlist</span>
+                    <span className="text-white fw-semibold" style={{ cursor: 'pointer' }} onClick={() => navigate('/user/orders')}>My Orders</span>
+                    <span className="text-white fw-semibold" style={{ cursor: 'pointer' }} onClick={handleLogout}>Logout ({user.fullName?.split(' ')[0]})</span>
                 </div>
             </nav>
 
-            <div className="container py-5">
-                <button className="btn btn-outline-secondary mb-4" onClick={() => navigate(-1)}>← Back</button>
-                <div className="row g-5">
-                    <div className="col-md-5">
-                        <img src={book.coverImage} alt={book.title} className="w-100 rounded shadow" style={{ maxHeight: '500px', objectFit: 'cover' }} />
-                    </div>
-                    <div className="col-md-7">
-                        <h2 className="fw-bold" style={{ color: '#5D2E17' }}>{book.title}</h2>
-                        <p className="text-muted">Author: <strong>{book.author?.name || 'Unknown'}</strong></p>
-                        <p className="text-muted">Category: <strong>{book.category?.name || 'N/A'}</strong></p>
+            <div className="container py-5 text-center">
+                {/* Large book cover centered */}
+                <div className="d-flex justify-content-center mb-4">
+                    <img
+                        src={book.coverImage}
+                        alt={book.title}
+                        className="shadow"
+                        style={{ height: '350px', width: '240px', objectFit: 'cover', borderRadius: '4px' }}
+                    />
+                </div>
 
-                        <div className="d-flex align-items-center gap-3 mt-3">
-                            {book.discountPercent > 0 && (
-                                <span className="text-muted text-decoration-line-through fs-5">₹{book.price}</span>
-                            )}
-                            <span className="fw-bold fs-3" style={{ color: '#D9534F' }}>₹{book.finalPrice || book.price}</span>
-                            {book.discountPercent > 0 && (
-                                <span className="badge bg-success fs-6">{book.discountPercent}% OFF</span>
-                            )}
-                        </div>
+                {/* Two Columns Grid Below */}
+                <div className="row g-4 justify-content-center text-start mx-auto" style={{ maxWidth: '800px' }}>
 
-                        <p className="mt-4 text-dark">{book.description}</p>
-
-                        <div className="mt-3 d-flex gap-2">
-                            <span className="badge bg-secondary">Stock: {book.stockQuantity}</span>
-                            <span className="badge bg-info">Rating: {book.averageRating}/5</span>
-                            <span className="badge bg-warning text-dark">{book.format}</span>
-                        </div>
-
-                        <div className="mt-4 d-flex gap-3">
-                            <button className="btn btn-lg text-white fw-bold px-4" style={{ backgroundColor: '#8B4513', border: 'none' }} onClick={handleAddToCart}>
-                                🛒 Add to Cart
-                            </button>
-                            <button className="btn btn-lg text-white fw-bold px-4" style={{ backgroundColor: '#D9534F', border: 'none' }} onClick={() => {
-                                handleAddToCart();
-                                navigate('/cart');
-                            }}>
-                                ⚡ Buy Now
-                            </button>
+                    {/* Left Panel: Description */}
+                    <div className="col-12 col-md-6">
+                        <div className="card p-3 h-100 border-0 shadow-sm" style={{ backgroundColor: '#FDFBF7' }}>
+                            <h6 className="fw-bold border-bottom pb-2">Description</h6>
+                            <p className="small text-muted" style={{ lineHeight: '1.6' }}>
+                                {book.description || 'A practical guide to building good habits and breaking bad ones, backed by scientific research.'}
+                            </p>
                         </div>
                     </div>
+
+                    {/* Right Panel: Info */}
+                    <div className="col-12 col-md-6">
+                        <div className="card p-3 h-100 border-0 shadow-sm" style={{ backgroundColor: '#FDFBF7' }}>
+                            <h6 className="fw-bold border-bottom pb-2">Info</h6>
+                            <div className="small">
+                                <div className="mb-2"><strong>Title:</strong> {book.title}</div>
+                                <div className="mb-2"><strong>Author:</strong> {book.author?.name || 'Unknown'}</div>
+                                <div className="mb-2"><strong>Genre:</strong> {book.category?.name || 'Self-Help / Psychology'}</div>
+                                <div className="mb-2"><strong>Price:</strong> ₹{book.finalPrice || book.price}</div>
+                                <div><strong>Seller:</strong> {book.seller?.fullName || 'Pravanshu'}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* But Now Button Centered */}
+                <div className="mt-4">
+                    <button
+                        className="btn btn-sm px-5 py-2 text-white fw-bold"
+                        style={{ backgroundColor: '#8B4513', border: 'none', borderRadius: '4px' }}
+                        onClick={handleAddToCart}
+                    >
+                        Buy Now
+                    </button>
                 </div>
             </div>
         </div>

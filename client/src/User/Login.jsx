@@ -34,24 +34,43 @@ const UserLogin = () => {
     };
 
     return (
-        <div style={{ backgroundColor: '#F9F6F0', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: 'Outfit, sans-serif' }}>
-            <div className="card shadow-sm p-4 border" style={{ width: '380px', backgroundColor: '#FDFBF7' }}>
-                <h4 className="text-center fw-bold mb-4" style={{ color: '#5D2E17' }}>User Login</h4>
+        <div style={{ backgroundColor: '#F4ECE1', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: 'Outfit, sans-serif' }}>
+            <div className="card shadow-sm p-4 border-0" style={{ width: '360px', backgroundColor: '#FDFBF7', borderRadius: '8px' }}>
+                <h4 className="text-center fw-bold mb-4" style={{ color: '#5D2E17' }}>Login to User Account</h4>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label className="form-label text-secondary small fw-bold">Email</label>
-                        <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        <label className="form-label text-secondary small fw-bold">Email address</label>
+                        <input
+                            type="email"
+                            className="form-control form-control-sm"
+                            placeholder="Email address"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
                     </div>
-                    <div className="mb-4">
+                    <div className="mb-3">
                         <label className="form-label text-secondary small fw-bold">Password</label>
-                        <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <input
+                            type="password"
+                            className="form-control form-control-sm"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                     </div>
-                    <button type="submit" className="btn btn-lg w-100 text-white fw-bold" style={{ backgroundColor: '#D9534F', border: 'none' }} disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
+                    <button
+                        type="submit"
+                        className="btn btn-sm w-100 text-white fw-bold mb-3 py-2"
+                        style={{ backgroundColor: '#8B4513', border: 'none', borderRadius: '4px' }}
+                        disabled={loading}
+                    >
+                        {loading ? 'Logging in...' : 'Log In'}
                     </button>
                 </form>
-                <div className="text-center mt-3 small text-muted">
-                    New user? <Link to="/user/signup" style={{ color: '#D9534F', fontWeight: 'bold', textDecoration: 'none' }}>Signup</Link>
+                <div className="text-center mt-2 small text-muted">
+                    Don't have an account? Create <Link to="/user/signup" style={{ color: '#8B4513', fontWeight: 'bold', textDecoration: 'none' }}>Signup</Link>
                 </div>
             </div>
         </div>

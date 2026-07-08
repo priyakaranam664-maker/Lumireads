@@ -7,7 +7,6 @@ const UserSignup = () => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -15,9 +14,14 @@ const UserSignup = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('/api/auth/register', { fullName, email, password, phone, role: 'user' });
+            const res = await axios.post('/api/auth/register', {
+                fullName,
+                email,
+                password,
+                role: 'user'
+            });
             if (res.data.success) {
-                toast.success('Account created! Please log in.');
+                toast.success('User registration successful! Please log in.');
                 navigate('/user/login');
             }
         } catch (error) {
@@ -28,32 +32,54 @@ const UserSignup = () => {
     };
 
     return (
-        <div style={{ backgroundColor: '#F9F6F0', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: 'Outfit, sans-serif' }}>
-            <div className="card shadow-sm p-4 border" style={{ width: '380px', backgroundColor: '#FDFBF7' }}>
-                <h4 className="text-center fw-bold mb-4" style={{ color: '#5D2E17' }}>User Signup</h4>
+        <div style={{ backgroundColor: '#F4ECE1', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: 'Outfit, sans-serif' }}>
+            <div className="card shadow-sm p-4 border-0" style={{ width: '360px', backgroundColor: '#FDFBF7', borderRadius: '8px' }}>
+                <h4 className="text-center fw-bold mb-4" style={{ color: '#5D2E17' }}>User Registration</h4>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label className="form-label text-secondary small fw-bold">Name</label>
-                        <input type="text" className="form-control" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                        <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            placeholder="Name"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            required
+                        />
                     </div>
                     <div className="mb-3">
-                        <label className="form-label text-secondary small fw-bold">Email</label>
-                        <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        <label className="form-label text-secondary small fw-bold">Email address</label>
+                        <input
+                            type="email"
+                            className="form-control form-control-sm"
+                            placeholder="Email address"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
                     </div>
                     <div className="mb-3">
-                        <label className="form-label text-secondary small fw-bold">Phone</label>
-                        <input type="text" className="form-control" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                    </div>
-                    <div className="mb-4">
                         <label className="form-label text-secondary small fw-bold">Password</label>
-                        <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <input
+                            type="password"
+                            className="form-control form-control-sm"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                     </div>
-                    <button type="submit" className="btn btn-lg w-100 text-white fw-bold" style={{ backgroundColor: '#D9534F', border: 'none' }} disabled={loading}>
-                        {loading ? 'Creating...' : 'Signup'}
+                    <button
+                        type="submit"
+                        className="btn btn-sm w-100 text-white fw-bold mb-3 py-2"
+                        style={{ backgroundColor: '#8B4513', border: 'none', borderRadius: '4px' }}
+                        disabled={loading}
+                    >
+                        {loading ? 'Submitting...' : 'Signup'}
                     </button>
                 </form>
-                <div className="text-center mt-3 small text-muted">
-                    Already have an account? <Link to="/user/login" style={{ color: '#D9534F', fontWeight: 'bold', textDecoration: 'none' }}>Login</Link>
+                <div className="text-center mt-2 small text-muted">
+                    Already have an account? <Link to="/user/login" style={{ color: '#8B4513', fontWeight: 'bold', textDecoration: 'none' }}>Login</Link>
                 </div>
             </div>
         </div>
