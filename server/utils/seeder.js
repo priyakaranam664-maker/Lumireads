@@ -27,8 +27,8 @@ const seed = async () => {
         console.log('🌱 Creating Users...');
         const adminUser = await User.create({
             fullName: 'Admin User',
-            email: 'admin@bookstore.com',
-            password: 'Admin@123',
+            email: '23kb1a3064@nbkrist.org',
+            password: 'manoj@007',
             role: 'admin',
             isEmailVerified: true
         });

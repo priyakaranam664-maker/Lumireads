@@ -99,15 +99,6 @@ const Login = () => {
                     <p className="text-center mt-3" style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                         Don't have an account? <Link to="/register" style={{ fontWeight: 700 }}>Create one</Link>
                     </p>
-
-                    <div style={{ textAlign: 'center', margin: '1rem 0', position: 'relative' }}>
-                        <hr style={{ borderColor: 'var(--border-color)' }} />
-                        <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'var(--bg-card)', padding: '0 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Demo Credentials</span>
-                    </div>
-                    <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        <div><strong>Admin:</strong> admin@bookstore.com / Admin@123</div>
-                        <div><strong>User:</strong> john@example.com / User@123</div>
-                    </div>
                 </div>
             </div>
         </>
