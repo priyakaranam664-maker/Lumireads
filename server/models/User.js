@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema(
         preferences: {
             newsletter: { type: Boolean, default: true },
             notifications: { type: Boolean, default: true },
-            theme: { type: String, enum: ['light', 'dark'], default: 'light' },
+            theme: { type: String, enum: ['light', 'dark', 'midnight', 'sunset', 'forest'], default: 'light' },
         },
     },
     { timestamps: true }

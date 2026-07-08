@@ -72,6 +72,94 @@
   --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.25);
 }
 
+/* Midnight Deep Blue Theme */
+[data-theme="midnight"] {
+  --primary: #6366F1;
+  --primary-dark: #4F46E5;
+  --primary-light: #818CF8;
+  --primary-50: rgba(99, 102, 241, 0.1);
+  --secondary: #EC4899;
+  --secondary-dark: #DB2777;
+
+  --bg-primary: #0B0F19;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1F2937;
+  --bg-card: #151D30;
+  --bg-glass: rgba(21, 29, 48, 0.9);
+
+  --text-primary: #F9FAFB;
+  --text-secondary: #E5E7EB;
+  --text-muted: #9CA3AF;
+
+  --border-color: #1F2937;
+  --border-light: #111827;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.25);
+}
+
+/* Sunset Warm theme */
+[data-theme="sunset"] {
+  --primary: #F97316;
+  --primary-dark: #EA580C;
+  --primary-light: #FDBA74;
+  --primary-50: rgba(249, 115, 22, 0.1);
+  --secondary: #84CC16;
+  --secondary-dark: #65A30D;
+
+  --bg-primary: #FFFDF5;
+  --bg-secondary: #FDF6E2;
+  --bg-tertiary: #F8E8C1;
+  --bg-card: #FAF2DA;
+  --bg-glass: rgba(250, 242, 218, 0.9);
+
+  --text-primary: #431407;
+  --text-secondary: #7C2D12;
+  --text-muted: #9A3412;
+
+  --border-color: #ECC880;
+  --border-light: #F2DCB1;
+
+  --shadow-sm: 0 1px 2px rgba(124, 45, 18, 0.05);
+  --shadow-md: 0 4px 6px rgba(124, 45, 18, 0.07);
+  --shadow-lg: 0 10px 15px rgba(124, 45, 18, 0.1);
+  --shadow-xl: 0 20px 25px rgba(124, 45, 18, 0.12);
+  --shadow-glow: 0 0 20px rgba(249, 115, 22, 0.15);
+}
+
+/* Forest Green theme */
+[data-theme="forest"] {
+  --primary: #059669;
+  --primary-dark: #047857;
+  --primary-light: #34D399;
+  --primary-50: rgba(5, 150, 105, 0.1);
+  --secondary: #D97706;
+  --secondary-dark: #B45309;
+
+  --bg-primary: #061C14;
+  --bg-secondary: #0B2F23;
+  --bg-tertiary: #134E3A;
+  --bg-card: #0D3E2F;
+  --bg-glass: rgba(13, 62, 47, 0.9);
+
+  --text-primary: #ECFDF5;
+  --text-secondary: #D1FAE5;
+  --text-muted: #86EFAC;
+
+  --border-color: #165B44;
+  --border-light: #0B2F23;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(5, 150, 105, 0.25);
+}
+
+
 /* Global Reset & Base */
 *,
 *::before,
