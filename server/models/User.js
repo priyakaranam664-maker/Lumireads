@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
         phone: { type: String, trim: true },
         password: { type: String, required: [true, 'Password is required'], minlength: 6, select: false },
         avatar: { type: String, default: '' },
-        role: { type: String, enum: ['user', 'admin'], default: 'user' },
+        role: { type: String, enum: ['user', 'seller', 'admin'], default: 'user' },
         gender: { type: String, enum: ['male', 'female', 'other', ''] },
         dateOfBirth: { type: Date },
         addresses: [

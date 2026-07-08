@@ -8,8 +8,8 @@ router.get('/', getUserOrders);
 router.get('/:id', getOrder);
 router.put('/:id/cancel', cancelOrder);
 
-// Admin
-router.get('/admin/all', authorize('admin'), getAllOrders);
-router.put('/admin/:id', authorize('admin'), updateOrderStatus);
+// Admin/Seller
+router.get('/admin/all', authorize('admin', 'seller'), getAllOrders);
+router.put('/admin/:id', authorize('admin', 'seller'), updateOrderStatus);
 
 module.exports = router;

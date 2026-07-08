@@ -11,10 +11,10 @@ router.get('/search/autocomplete', autocomplete);
 router.get('/', getBooks);
 router.get('/:identifier', getBook);
 
-// Admin routes
-router.get('/admin/all', protect, authorize('admin'), getAllBooksAdmin);
-router.post('/', protect, authorize('admin'), createBook);
-router.put('/:id', protect, authorize('admin'), updateBook);
-router.delete('/:id', protect, authorize('admin'), deleteBook);
+// Admin & Seller routes
+router.get('/admin/all', protect, authorize('admin', 'seller'), getAllBooksAdmin);
+router.post('/', protect, authorize('admin', 'seller'), createBook);
+router.put('/:id', protect, authorize('admin', 'seller'), updateBook);
+router.delete('/:id', protect, authorize('admin', 'seller'), deleteBook);
 
 module.exports = router;

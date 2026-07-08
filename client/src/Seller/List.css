@@ -1,0 +1,26 @@
+/* Seller Product List Styles */
+.seller-product-card {
+    background-color: #FDFBF7;
+    border: 1px solid #e8d8c4;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.seller-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(93, 46, 23, 0.15);
+}
+
+.seller-product-card img {
+    border-radius: 8px 8px 0 0;
+}
+
+.seller-product-card .card-body {
+    padding: 1rem;
+}
+
+.seller-product-card .btn-outline-primary,
+.seller-product-card .btn-outline-danger {
+    font-size: 0.85rem;
+    border-radius: 4px;
+}

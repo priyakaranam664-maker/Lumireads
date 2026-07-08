@@ -9,7 +9,7 @@ import SocialAuthHandler from './components/SocialAuthHandler';
 import BackToTop, { ScrollToTopOnNavigate } from './components/BackToTop';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Lazy loaded pages
+// ====== Existing Pages (lazy loaded) ======
 const Home = lazy(() => import('./pages/Home'));
 const Books = lazy(() => import('./pages/Books'));
 const BookDetail = lazy(() => import('./pages/BookDetail'));
@@ -30,7 +30,7 @@ const Contact = lazy(() => import('./pages/Contact'));
 const About = lazy(() => import('./pages/About'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Admin pages
+// Existing Admin pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminBooks = lazy(() => import('./pages/admin/AdminBooks'));
 const AdminBookForm = lazy(() => import('./pages/admin/AdminBookForm'));
@@ -39,6 +39,36 @@ const AdminAuthors = lazy(() => import('./pages/admin/AdminAuthors'));
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminCoupons = lazy(() => import('./pages/admin/AdminCoupons'));
+
+// ====== BookVerse Pages ======
+// Components
+const BookVerseHome = lazy(() => import('./Components/Home'));
+
+// Admin (BookVerse)
+const Alogin = lazy(() => import('./Admin/Alogin'));
+const Asignup = lazy(() => import('./Admin/Asignup'));
+const Ahome = lazy(() => import('./Admin/Ahome'));
+const AdminItemsBV = lazy(() => import('./Admin/items'));
+const AdminUsersBV = lazy(() => import('./Admin/Users'));
+const AdminSellerBV = lazy(() => import('./Admin/Seller'));
+
+// Seller (BookVerse)
+const Slogin = lazy(() => import('./Seller/Slogin'));
+const Ssignup = lazy(() => import('./Seller/Ssignup'));
+const Shome = lazy(() => import('./Seller/Shome'));
+const SellerMyProducts = lazy(() => import('./Seller/MyProducts'));
+const SellerAddbook = lazy(() => import('./Seller/Addbook'));
+const SellerBook = lazy(() => import('./Seller/Book'));
+const SellerOrders = lazy(() => import('./Seller/Orders'));
+
+// User (BookVerse)
+const UserLogin = lazy(() => import('./User/Login'));
+const UserSignup = lazy(() => import('./User/Signup'));
+const Uhome = lazy(() => import('./User/Uhome'));
+const UserProducts = lazy(() => import('./User/Products'));
+const Uitem = lazy(() => import('./User/Uitem'));
+const UserMyOrders = lazy(() => import('./User/MyOrders'));
+const UserOrderItem = lazy(() => import('./User/OrderItem'));
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -71,6 +101,36 @@ function App() {
             <Suspense fallback={<LoadingSpinner />}>
                 <ErrorBoundary>
                     <Routes>
+                        {/* ====== BookVerse Role-Based Routes ====== */}
+                        <Route path="/bookverse" element={<BookVerseHome />} />
+
+                        {/* Admin (BookVerse) */}
+                        <Route path="/admin/login" element={<Alogin />} />
+                        <Route path="/admin/signup" element={<Asignup />} />
+                        <Route path="/admin/home" element={<Ahome />} />
+                        <Route path="/admin/items" element={<AdminItemsBV />} />
+                        <Route path="/admin/users" element={<AdminUsersBV />} />
+                        <Route path="/admin/sellers" element={<AdminSellerBV />} />
+
+                        {/* Seller (BookVerse) */}
+                        <Route path="/seller/login" element={<Slogin />} />
+                        <Route path="/seller/signup" element={<Ssignup />} />
+                        <Route path="/seller/home" element={<Shome />} />
+                        <Route path="/seller/products" element={<SellerMyProducts />} />
+                        <Route path="/seller/add-book" element={<SellerAddbook />} />
+                        <Route path="/seller/book/:id" element={<SellerBook />} />
+                        <Route path="/seller/orders" element={<SellerOrders />} />
+
+                        {/* User (BookVerse) */}
+                        <Route path="/user/login" element={<UserLogin />} />
+                        <Route path="/user/signup" element={<UserSignup />} />
+                        <Route path="/user/home" element={<Uhome />} />
+                        <Route path="/user/products" element={<UserProducts />} />
+                        <Route path="/user/item/:identifier" element={<Uitem />} />
+                        <Route path="/user/orders" element={<UserMyOrders />} />
+                        <Route path="/user/order/:id" element={<UserOrderItem />} />
+
+                        {/* ====== Original BookStore Routes ====== */}
                         {/* Public routes */}
                         <Route element={<MainLayout />}>
                             <Route path="/" element={<Home />} />
@@ -97,7 +157,7 @@ function App() {
                             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                         </Route>
 
-                        {/* Admin routes */}
+                        {/* Original admin routes */}
                         <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
                             <Route path="/admin" element={<AdminDashboard />} />
                             <Route path="/admin/books" element={<AdminBooks />} />
@@ -106,7 +166,7 @@ function App() {
                             <Route path="/admin/categories" element={<AdminCategories />} />
                             <Route path="/admin/authors" element={<AdminAuthors />} />
                             <Route path="/admin/orders" element={<AdminOrders />} />
-                            <Route path="/admin/users" element={<AdminUsers />} />
+                            <Route path="/admin/users-manage" element={<AdminUsers />} />
                             <Route path="/admin/coupons" element={<AdminCoupons />} />
                         </Route>
 

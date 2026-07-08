@@ -5,9 +5,8 @@ const { APIFeatures } = require('../utils/helpers');
 // @route   GET /api/books
 exports.getBooks = async (req, res, next) => {
     try {
-        // Build filter object
         const filter = { isActive: true };
-
+        if (req.query.seller) filter.seller = req.query.seller;
         if (req.query.category) filter.category = req.query.category;
         if (req.query.author) filter.author = req.query.author;
         if (req.query.publisher) filter.publisher = req.query.publisher;
@@ -136,10 +135,15 @@ exports.getBook = async (req, res, next) => {
     }
 };
 
-// @desc    Create book (Admin)
+
+
+// @desc    Create book (Admin or Seller)
 // @route   POST /api/books
 exports.createBook = async (req, res, next) => {
     try {
+        if (req.user.role === 'seller') {
+            req.body.seller = req.user._id;
+        }
         const book = await Book.create(req.body);
         res.status(201).json({ success: true, data: book, message: 'Book created successfully' });
     } catch (error) {
@@ -147,28 +151,41 @@ exports.createBook = async (req, res, next) => {
     }
 };
 
-// @desc    Update book (Admin)
+// @desc    Update book (Admin or Seller)
 // @route   PUT /api/books/:id
 exports.updateBook = async (req, res, next) => {
     try {
-        const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        let book = await Book.findById(req.params.id);
         if (!book) {
             return res.status(404).json({ success: false, message: 'Book not found' });
         }
+        // If seller, check ownership
+        if (req.user.role === 'seller' && book.seller && book.seller.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to edit this book' });
+        }
+
+        book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         res.status(200).json({ success: true, data: book, message: 'Book updated successfully' });
     } catch (error) {
         next(error);
     }
 };
 
-// @desc    Delete book (Admin - soft delete)
+// @desc    Delete book (Admin or Seller - soft delete)
 // @route   DELETE /api/books/:id
 exports.deleteBook = async (req, res, next) => {
     try {
-        const book = await Book.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+        const book = await Book.findById(req.params.id);
         if (!book) {
             return res.status(404).json({ success: false, message: 'Book not found' });
         }
+        // If seller, check ownership
+        if (req.user.role === 'seller' && book.seller && book.seller.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to delete this book' });
+        }
+
+        book.isActive = false;
+        await book.save();
         res.status(200).json({ success: true, message: 'Book deleted successfully' });
     } catch (error) {
         next(error);
@@ -272,6 +289,9 @@ exports.getAllBooksAdmin = async (req, res, next) => {
         const limit = parseInt(req.query.limit, 10) || 20;
         const skip = (page - 1) * limit;
         const filter = {};
+        if (req.user.role === 'seller') {
+            filter.seller = req.user._id;
+        }
 
         if (req.query.q) {
             filter.$or = [

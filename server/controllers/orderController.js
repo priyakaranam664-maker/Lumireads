@@ -206,6 +206,13 @@ exports.getAllOrders = async (req, res, next) => {
         if (req.query.paymentStatus) filter.paymentStatus = req.query.paymentStatus;
         if (req.query.q) filter.orderNumber = { $regex: req.query.q, $options: 'i' };
 
+        // If seller, filter orders containing user's books
+        if (req.user.role === 'seller') {
+            const sellerBooks = await Book.find({ seller: req.user._id }).select('_id');
+            const sellerBookIds = sellerBooks.map(b => b._id);
+            filter['items.book'] = { $in: sellerBookIds };
+        }
+
         const total = await Order.countDocuments(filter);
         const orders = await Order.find(filter)
             .populate('user', 'fullName email')

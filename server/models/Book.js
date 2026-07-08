@@ -39,6 +39,7 @@ const bookSchema = new mongoose.Schema(
         weight: { type: String },
         dimensions: { type: String },
         format: { type: String, enum: ['Hardcover', 'Paperback', 'eBook', 'Audiobook'], default: 'Paperback' },
+        seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     },
     { timestamps: true }
 );

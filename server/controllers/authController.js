@@ -8,14 +8,14 @@ const { sendEmail } = require('../config/email');
 // @route   POST /api/auth/register
 exports.register = async (req, res, next) => {
     try {
-        const { fullName, email, password, phone } = req.body;
+        const { fullName, email, password, phone, role } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(409).json({ success: false, message: 'Email already registered' });
         }
 
-        const user = await User.create({ fullName, email, password, phone });
+        const user = await User.create({ fullName, email, password, phone, role });
 
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
