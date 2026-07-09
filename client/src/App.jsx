@@ -42,7 +42,7 @@ const AdminCoupons = lazy(() => import('./pages/admin/AdminCoupons'));
 
 // ====== BookVerse Pages ======
 // Components
-const BookVerseHome = lazy(() => import('./Components/Home'));
+const BookVerseHome = lazy(() => import('./components/Home'));
 
 // Admin (BookVerse)
 const Alogin = lazy(() => import('./Admin/Alogin'));
