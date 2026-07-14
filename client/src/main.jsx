@@ -8,6 +8,13 @@ import { ThemeProvider } from './context/ThemeContext';
 import { CartProvider } from './context/CartContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/index.css';
+// Premium Design System
+import './styles/premium-design.css';
+import './styles/premium-navbar.css';
+import './styles/premium-book-card.css';
+import './styles/premium-home.css';
+import './styles/premium-footer.css';
+import './styles/book-detail-premium.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>

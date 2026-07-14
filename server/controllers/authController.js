@@ -3,6 +3,11 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken, setTokenCookies, clearTokenCookies } = require('../utils/helpers');
 const { sendEmail } = require('../config/email');
+const { createUser, findUserByEmail, verifyPassword } = require('../utils/authStore');
+
+const useFallbackAuth = () => {
+    return process.env.MONGO_URI && process.env.MONGO_URI.includes('mongodb') && process.env.NODE_ENV !== 'test';
+};
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -10,25 +15,43 @@ exports.register = async (req, res, next) => {
     try {
         const { fullName, email, password, phone, role } = req.body;
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(409).json({ success: false, message: 'Email already registered' });
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Please provide email and password' });
         }
 
-        const user = await User.create({ fullName, email, password, phone, role });
+        let user;
+        let accessToken;
+        let refreshToken;
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        try {
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return res.status(409).json({ success: false, message: 'Email already registered' });
+            }
 
-        user.refreshTokens.push({ token: refreshToken });
-        user.lastLogin = new Date();
-        await user.save({ validateBeforeSave: false });
+            user = await User.create({ fullName, email, password, phone, role });
+            accessToken = generateAccessToken(user._id);
+            refreshToken = generateRefreshToken(user._id);
+            user.refreshTokens.push({ token: refreshToken });
+            user.lastLogin = new Date();
+            await user.save({ validateBeforeSave: false });
+        } catch (dbError) {
+            if (dbError.name === 'MongooseError' || dbError.name === 'MongoServerError' || dbError.message?.includes('buffering timed out')) {
+                user = await createUser({ fullName, email, password, role: role || 'user' });
+                accessToken = generateAccessToken(user.id);
+                refreshToken = generateRefreshToken(user.id);
+                user.refreshTokens = [{ token: refreshToken }];
+            } else {
+                throw dbError;
+            }
+        }
 
         setTokenCookies(res, accessToken, refreshToken);
 
-        const userData = user.toObject();
+        const userData = user.toObject ? user.toObject() : { ...user };
         delete userData.password;
         delete userData.refreshTokens;
+        userData._id = userData._id || user.id;
 
         res.status(201).json({
             success: true,
@@ -50,36 +73,57 @@ exports.login = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide email and password' });
         }
 
-        const user = await User.findOne({ email }).select('+password');
-        if (!user) {
-            return res.status(401).json({ success: false, message: 'Invalid email or password' });
-        }
+        let user;
+        let accessToken;
+        let refreshToken;
 
-        if (!user.isActive) {
-            return res.status(401).json({ success: false, message: 'Account deactivated. Contact support.' });
-        }
+        try {
+            user = await User.findOne({ email }).select('+password');
+            if (!user) {
+                return res.status(401).json({ success: false, message: 'Invalid email or password' });
+            }
 
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ success: false, message: 'Invalid email or password' });
-        }
+            if (!user.isActive) {
+                return res.status(401).json({ success: false, message: 'Account deactivated. Contact support.' });
+            }
 
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+            const isMatch = await user.comparePassword(password);
+            if (!isMatch) {
+                return res.status(401).json({ success: false, message: 'Invalid email or password' });
+            }
 
-        // Keep only last 5 refresh tokens
-        if (user.refreshTokens.length >= 5) {
-            user.refreshTokens = user.refreshTokens.slice(-4);
+            accessToken = generateAccessToken(user._id);
+            refreshToken = generateRefreshToken(user._id);
+            if (user.refreshTokens.length >= 5) {
+                user.refreshTokens = user.refreshTokens.slice(-4);
+            }
+            user.refreshTokens.push({ token: refreshToken });
+            user.lastLogin = new Date();
+            await user.save({ validateBeforeSave: false });
+        } catch (dbError) {
+            if (dbError.name === 'MongooseError' || dbError.name === 'MongoServerError' || dbError.message?.includes('buffering timed out')) {
+                user = await findUserByEmail(email);
+                if (!user) {
+                    return res.status(401).json({ success: false, message: 'Invalid email or password' });
+                }
+                const isMatch = await verifyPassword(password, user);
+                if (!isMatch) {
+                    return res.status(401).json({ success: false, message: 'Invalid email or password' });
+                }
+                accessToken = generateAccessToken(user.id);
+                refreshToken = generateRefreshToken(user.id);
+                user.refreshTokens = [{ token: refreshToken }];
+            } else {
+                throw dbError;
+            }
         }
-        user.refreshTokens.push({ token: refreshToken });
-        user.lastLogin = new Date();
-        await user.save({ validateBeforeSave: false });
 
         setTokenCookies(res, accessToken, refreshToken);
 
-        const userData = user.toObject();
+        const userData = user.toObject ? user.toObject() : { ...user };
         delete userData.password;
         delete userData.refreshTokens;
+        userData._id = userData._id || user.id;
 
         res.status(200).json({
             success: true,

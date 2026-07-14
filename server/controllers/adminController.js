@@ -5,6 +5,7 @@ const Review = require('../models/Review');
 const Coupon = require('../models/Coupon');
 const Notification = require('../models/Notification');
 const { Banner, Contact, Settings } = require('../models/Others');
+const { isDbUnavailableError, getFallbackBannersResponse } = require('../utils/fallbackData');
 
 // @desc    Get dashboard stats
 exports.getDashboardStats = async (req, res, next) => {
@@ -97,7 +98,12 @@ exports.getBanners = async (req, res, next) => {
         if (req.query.position) filter.position = req.query.position;
         const banners = await Banner.find(filter).sort('sortOrder').lean();
         res.status(200).json({ success: true, data: banners });
-    } catch (error) { next(error); }
+    } catch (error) {
+        if (isDbUnavailableError(error)) {
+            return res.status(200).json(getFallbackBannersResponse());
+        }
+        next(error);
+    }
 };
 
 exports.createBanner = async (req, res, next) => {

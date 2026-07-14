@@ -4,14 +4,14 @@ const publisherSchema = new mongoose.Schema(
     {
         name: { type: String, required: [true, 'Publisher name is required'], trim: true },
         slug: { type: String, lowercase: true },
-        logo: { type: String },
-        address: { type: String },
-        contactEmail: { type: String },
-        contactPhone: { type: String },
+        logoUrl: { type: String },
+        country: { type: String },
         website: { type: String },
         description: { type: String },
-        isActive: { type: Boolean, default: true },
+        totalPublishedBooks: { type: Number, default: 0 },
         bookCount: { type: Number, default: 0 },
+        books: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }],
+        isActive: { type: Boolean, default: true },
     },
     { timestamps: true }
 );

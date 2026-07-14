@@ -10,7 +10,7 @@ import BackToTop, { ScrollToTopOnNavigate } from './components/BackToTop';
 import ErrorBoundary from './components/ErrorBoundary';
 
 // ====== Existing Pages (lazy loaded) ======
-const Home = lazy(() => import('./pages/Home'));
+const Home = lazy(() => import('./pages/PremiumHome'));
 const Books = lazy(() => import('./pages/Books'));
 const BookDetail = lazy(() => import('./pages/BookDetail'));
 const Categories = lazy(() => import('./pages/Categories'));

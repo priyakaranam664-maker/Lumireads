@@ -222,6 +222,7 @@ const Home = () => {
     const [trending, setTrending] = useState([]);
     const [categories, setCategories] = useState([]);
     const [banners, setBanners] = useState([]);
+    const [liveStats, setLiveStats] = useState({ totalBooks: 0, totalCategories: 0, totalOrders: 0, timestamp: '' });
     const [loading, setLoading] = useState(true);
 
     // Filtering layout variables for New Arrivals
@@ -232,10 +233,11 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [featRes, bestRes, newRes, trendRes, catRes, banRes] = await Promise.all([
+                const [featRes, bestRes, newRes, trendRes, catRes, banRes, liveRes] = await Promise.all([
                     bookAPI.getFeatured(10), bookAPI.getBestSellers(10),
                     bookAPI.getNewArrivals(10), bookAPI.getTrending(10),
                     categoryAPI.getAll(), generalAPI.getBanners({ position: 'hero' }),
+                    generalAPI.getLiveStats(),
                 ]);
                 setFeatured(featRes.data.data || []);
                 setBestSellers(bestRes.data.data || []);
@@ -243,13 +245,20 @@ const Home = () => {
                 setTrending(trendRes.data.data || []);
                 setCategories(catRes.data.data || []);
                 setBanners(banRes.data.data || []);
+                setLiveStats(liveRes.data.data || { totalBooks: 0, totalCategories: 0, totalOrders: 0, timestamp: '' });
             } catch (err) {
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchData();
+        const interval = window.setInterval(() => {
+            fetchData();
+        }, 15000);
+
+        return () => window.clearInterval(interval);
     }, []);
 
     const handleSearchSubmit = (e) => {
@@ -322,18 +331,18 @@ const Home = () => {
                                 {/* Responsive Stats Bar */}
                                 <div className="hero-stats-row d-none d-sm-flex">
                                     <div className="hero-stat-card">
-                                        <span className="hero-stat-val">30K<span>+</span></span>
-                                        <span className="hero-stat-lbl">Premium Books</span>
+                                        <span className="hero-stat-val">{liveStats.totalBooks}<span>+</span></span>
+                                        <span className="hero-stat-lbl">Live Books</span>
                                     </div>
                                     <div style={{ width: '1px', background: 'var(--border-color)', height: '40px' }} />
                                     <div className="hero-stat-card">
-                                        <span className="hero-stat-val">12K<span>+</span></span>
-                                        <span className="hero-stat-lbl">Loyal Readers</span>
+                                        <span className="hero-stat-val">{liveStats.totalCategories}<span>+</span></span>
+                                        <span className="hero-stat-lbl">Live Categories</span>
                                     </div>
                                     <div style={{ width: '1px', background: 'var(--border-color)', height: '40px' }} />
                                     <div className="hero-stat-card">
-                                        <span className="hero-stat-val">4.9<span>★</span></span>
-                                        <span className="hero-stat-lbl">Service Rating</span>
+                                        <span className="hero-stat-val">{liveStats.totalOrders}<span>+</span></span>
+                                        <span className="hero-stat-lbl">Live Orders</span>
                                     </div>
                                 </div>
                             </motion.div>

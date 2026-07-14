@@ -14,9 +14,17 @@
     "build": "npm run build --workspace=client",
     "start": "npm run start --workspace=server",
     "seed": "npm run seed --workspace=server",
+    "import-books": "npm run import-books --workspace=server",
     "lint": "eslint . --ext .js,.jsx"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "assert": "^2.1.0",
+    "buffer": "^6.0.3",
+    "concurrently": "^8.2.2",
+    "crypto-browserify": "^3.12.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5",
+    "vite-plugin-node-polyfills": "^0.28.0"
   }
 }

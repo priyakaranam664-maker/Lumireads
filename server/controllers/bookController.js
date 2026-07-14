@@ -1,5 +1,18 @@
+const mongoose = require('mongoose');
 const Book = require('../models/Book');
+const Category = require('../models/Category');
 const { APIFeatures } = require('../utils/helpers');
+const { isDbUnavailableError, getFallbackBooksResponse, getFallbackBookResponse } = require('../utils/fallbackData');
+
+const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const buildFuzzySearchRegex = (value) => {
+    const normalized = String(value).trim().replace(/\s+/g, ' ');
+    const tokens = normalized.split(' ').filter(Boolean);
+    const pattern = tokens
+        .map((token) => escapeRegExp(token).split('').join('.*?'))
+        .join('|');
+    return new RegExp(pattern, 'i');
+};
 
 // @desc    Get all books with filtering, sorting, pagination
 // @route   GET /api/books
@@ -7,7 +20,6 @@ exports.getBooks = async (req, res, next) => {
     try {
         const filter = { isActive: true };
         if (req.query.seller) filter.seller = req.query.seller;
-        if (req.query.category) filter.category = req.query.category;
         if (req.query.author) filter.author = req.query.author;
         if (req.query.publisher) filter.publisher = req.query.publisher;
         if (req.query.language) filter.language = req.query.language;
@@ -24,45 +36,69 @@ exports.getBooks = async (req, res, next) => {
             if (req.query.maxPrice) filter.finalPrice.$lte = Number(req.query.maxPrice);
         }
 
+        if (req.query.category) {
+            const categoryParam = String(req.query.category).trim();
+            if (categoryParam) {
+                const category = mongoose.Types.ObjectId.isValid(categoryParam)
+                    ? await Category.findById(categoryParam).lean()
+                    : await Category.findOne({ $or: [{ slug: categoryParam }, { name: { $regex: `^${escapeRegExp(categoryParam)}$`, $options: 'i' } }] }).lean();
+
+                if (category) {
+                    filter.$or = [
+                        { category: category._id },
+                        { categories: { $elemMatch: { $regex: new RegExp(`^${escapeRegExp(category.name)}$`, 'i') } } },
+                    ];
+                } else {
+                    const normalizedName = categoryParam.replace(/[-_]+/g, ' ');
+                    filter.categories = {
+                        $elemMatch: {
+                            $regex: new RegExp(`^(${escapeRegExp(categoryParam)}|${escapeRegExp(normalizedName)})$`, 'i'),
+                        },
+                    };
+                }
+            }
+        }
+
         // Rating filter
         if (req.query.minRating) {
             filter.averageRating = { $gte: Number(req.query.minRating) };
         }
 
-        // Discount filter
-        if (req.query.hasDiscount === 'true') {
-            filter.discountPercent = { $gt: 0 };
+        // Publication year range
+        if (req.query.yearFrom || req.query.yearTo) {
+            filter.publicationDate = {};
+            if (req.query.yearFrom) {
+                filter.publicationDate.$gte = new Date(Number(req.query.yearFrom), 0, 1);
+            }
+            if (req.query.yearTo) {
+                filter.publicationDate.$lte = new Date(Number(req.query.yearTo), 11, 31, 23, 59, 59, 999);
+            }
         }
 
-        // Stock filter
+        // Availability
         if (req.query.inStock === 'true') {
             filter.stockQuantity = { $gt: 0 };
         }
-
-        // Search
-        if (req.query.q || req.query.search) {
-            const searchTerm = req.query.q || req.query.search;
-            filter.$or = [
-                { title: { $regex: searchTerm, $options: 'i' } },
-                { tags: { $regex: searchTerm, $options: 'i' } },
-                { isbn: { $regex: searchTerm, $options: 'i' } },
-            ];
+        if (req.query.inStock === 'false') {
+            filter.stockQuantity = 0;
         }
 
-        // Sorting
         let sortBy = '-createdAt';
-        if (req.query.sort) {
-            const sortMap = {
-                'price-low': 'finalPrice',
-                'price-high': '-finalPrice',
-                'rating': '-averageRating',
-                'newest': '-createdAt',
-                'oldest': 'createdAt',
-                'popular': '-totalSold',
-                'title-az': 'title',
-                'title-za': '-title',
-                'discount': '-discountPercent',
-            };
+        const sortMap = {
+            'price-low': 'finalPrice',
+            'price-high': '-finalPrice',
+            'rating': '-averageRating',
+            'highest-rated': '-averageRating',
+            'newest': '-createdAt',
+            'oldest': 'createdAt',
+            'most-reviewed': '-totalReviews',
+            'popular': '-totalSold',
+            'trending': '-isTrending -totalSold -averageRating -createdAt',
+            'title-az': 'title',
+            'title-za': '-title',
+        };
+        const hasExplicitSort = Boolean(req.query.sort);
+        if (hasExplicitSort) {
             sortBy = sortMap[req.query.sort] || req.query.sort;
         }
 
@@ -70,15 +106,64 @@ exports.getBooks = async (req, res, next) => {
         const limit = parseInt(req.query.limit, 10) || 12;
         const skip = (page - 1) * limit;
 
-        const total = await Book.countDocuments(filter);
-        const books = await Book.find(filter)
-            .populate('author', 'name slug photo')
-            .populate('category', 'name slug')
-            .populate('publisher', 'name slug')
-            .sort(sortBy)
-            .skip(skip)
-            .limit(limit)
-            .lean();
+        let books = [];
+        let total = 0;
+        let activeFilter = filter;
+        const searchTerm = req.query.q || req.query.search;
+
+        if (searchTerm) {
+            const textFilter = { ...filter, $text: { $search: searchTerm } };
+            const textSort = !hasExplicitSort ? { score: { $meta: 'textScore' }, createdAt: -1 } : sortBy;
+            books = await Book.find(textFilter)
+                .populate('author', 'name slug photo')
+                .populate('category', 'name slug')
+                .populate('publisher', 'name slug')
+                .sort(textSort)
+                .skip(skip)
+                .limit(limit)
+                .lean();
+
+            total = await Book.countDocuments(textFilter);
+
+            if (books.length === 0 && searchTerm.length >= 2) {
+                const fuzzyRegex = buildFuzzySearchRegex(searchTerm);
+                const fuzzyFilter = {
+                    ...filter,
+                    $or: [
+                        { title: { $regex: fuzzyRegex } },
+                        { subtitle: { $regex: fuzzyRegex } },
+                        { authors: { $regex: fuzzyRegex } },
+                        { publisherName: { $regex: fuzzyRegex } },
+                        { categories: { $regex: fuzzyRegex } },
+                        { tags: { $regex: fuzzyRegex } },
+                        { isbn: { $regex: fuzzyRegex } },
+                    ],
+                };
+                const fuzzySort = hasExplicitSort ? sortBy : '-createdAt';
+                books = await Book.find(fuzzyFilter)
+                    .populate('author', 'name slug photo')
+                    .populate('category', 'name slug')
+                    .populate('publisher', 'name slug')
+                    .sort(fuzzySort)
+                    .skip(skip)
+                    .limit(limit)
+                    .lean();
+                total = await Book.countDocuments(fuzzyFilter);
+                activeFilter = fuzzyFilter;
+            } else {
+                activeFilter = textFilter;
+            }
+        } else {
+            books = await Book.find(filter)
+                .populate('author', 'name slug photo')
+                .populate('category', 'name slug')
+                .populate('publisher', 'name slug')
+                .sort(sortBy)
+                .skip(skip)
+                .limit(limit)
+                .lean();
+            total = await Book.countDocuments(filter);
+        }
 
         res.status(200).json({
             success: true,
@@ -92,6 +177,9 @@ exports.getBooks = async (req, res, next) => {
             },
         });
     } catch (error) {
+        if (isDbUnavailableError(error)) {
+            return res.status(200).json(getFallbackBooksResponse({ limit, page }));
+        }
         next(error);
     }
 };
@@ -188,6 +276,9 @@ exports.deleteBook = async (req, res, next) => {
         await book.save();
         res.status(200).json({ success: true, message: 'Book deleted successfully' });
     } catch (error) {
+        if (isDbUnavailableError(error)) {
+            return res.status(200).json(getFallbackBooksResponse({ limit: 3, page: 1 }));
+        }
         next(error);
     }
 };
@@ -203,6 +294,10 @@ exports.getFeaturedBooks = async (req, res, next) => {
             .lean();
         res.status(200).json({ success: true, data: books });
     } catch (error) {
+        if (isDbUnavailableError(error)) {
+            const limit = parseInt(req.query.limit, 10) || 8;
+            return res.status(200).json(getFallbackBooksResponse({ limit, page: 1 }));
+        }
         next(error);
     }
 };
@@ -212,6 +307,7 @@ exports.getFeaturedBooks = async (req, res, next) => {
 exports.getBestSellers = async (req, res, next) => {
     try {
         const limit = parseInt(req.query.limit, 10) || 8;
+        const page = 1;
         const books = await Book.find({ isBestSeller: true, isActive: true })
             .populate('author', 'name slug')
             .sort('-totalSold')
@@ -219,6 +315,11 @@ exports.getBestSellers = async (req, res, next) => {
             .lean();
         res.status(200).json({ success: true, data: books });
     } catch (error) {
+        const limit = parseInt(req.query.limit, 10) || 8;
+        const page = 1;
+        if (isDbUnavailableError(error)) {
+            return res.status(200).json(getFallbackBooksResponse({ limit, page }));
+        }
         next(error);
     }
 };
@@ -235,6 +336,10 @@ exports.getNewArrivals = async (req, res, next) => {
             .lean();
         res.status(200).json({ success: true, data: books });
     } catch (error) {
+        const limit = parseInt(req.query.limit, 10) || 8;
+        if (isDbUnavailableError(error)) {
+            return res.status(200).json(getFallbackBooksResponse({ limit, page: 1 }));
+        }
         next(error);
     }
 };
@@ -251,6 +356,10 @@ exports.getTrendingBooks = async (req, res, next) => {
             .lean();
         res.status(200).json({ success: true, data: books });
     } catch (error) {
+        const limit = parseInt(req.query.limit, 10) || 8;
+        if (isDbUnavailableError(error)) {
+            return res.status(200).json(getFallbackBooksResponse({ limit, page: 1 }));
+        }
         next(error);
     }
 };
@@ -263,19 +372,35 @@ exports.autocomplete = async (req, res, next) => {
         if (!q || q.length < 2) {
             return res.status(200).json({ success: true, data: [] });
         }
-        const books = await Book.find({
-            isActive: true,
-            $or: [
-                { title: { $regex: q, $options: 'i' } },
-                { tags: { $regex: q, $options: 'i' } },
-                { isbn: { $regex: q, $options: 'i' } },
-            ],
-        })
-            .select('title slug coverImage finalPrice author')
+
+        const textFilter = { isActive: true, $text: { $search: q } };
+        let suggestions = await Book.find(textFilter)
+            .select('title slug coverImage finalPrice author publisherName categories')
             .populate('author', 'name')
             .limit(8)
             .lean();
-        res.status(200).json({ success: true, data: books });
+
+        if (suggestions.length === 0) {
+            const fuzzyRegex = buildFuzzySearchRegex(q);
+            suggestions = await Book.find({
+                isActive: true,
+                $or: [
+                    { title: { $regex: fuzzyRegex } },
+                    { subtitle: { $regex: fuzzyRegex } },
+                    { authors: { $regex: fuzzyRegex } },
+                    { publisherName: { $regex: fuzzyRegex } },
+                    { categories: { $regex: fuzzyRegex } },
+                    { tags: { $regex: fuzzyRegex } },
+                    { isbn: { $regex: fuzzyRegex } },
+                ],
+            })
+                .select('title slug coverImage finalPrice author publisherName categories')
+                .populate('author', 'name')
+                .limit(8)
+                .lean();
+        }
+
+        res.status(200).json({ success: true, data: suggestions });
     } catch (error) {
         next(error);
     }

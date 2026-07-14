@@ -1,0 +1,72 @@
+[
+  {
+    "id": "bb83a6ca-b0a4-4594-a4a5-aa811b549eb6",
+    "fullName": "Test User",
+    "email": "user-1783854880908@example.com",
+    "password": "$2a$12$BTgk1089I09F3AZfm544eefAFzukgSX63LuXh0r/0f41Z88YCzZXS",
+    "role": "user",
+    "isActive": true,
+    "isEmailVerified": false,
+    "refreshTokens": [],
+    "createdAt": "2026-07-12T11:14:41.829Z",
+    "updatedAt": "2026-07-12T11:14:41.831Z"
+  },
+  {
+    "id": "ab074031-edb8-48e1-91e7-058f7405fe39",
+    "email": "demo-1783855010305@example.com",
+    "password": "$2a$12$oGNIRJ0wsHcuA/Pu9oBHt.lYh1hZ8cInirlhi8YbTz2JC9G1cTt0C",
+    "role": "user",
+    "isActive": true,
+    "isEmailVerified": false,
+    "refreshTokens": [],
+    "createdAt": "2026-07-12T11:17:01.222Z",
+    "updatedAt": "2026-07-12T11:17:01.222Z"
+  },
+  {
+    "id": "3e93db41-e854-4248-9873-50dbc856d007",
+    "email": "demo-1783855049432@example.com",
+    "password": "$2a$12$Gv/ihjInmmRNx3lQWp/YO.m6gJS4RtDuJRg4BZnt7K6Pzh4R/EH6G",
+    "role": "user",
+    "isActive": true,
+    "isEmailVerified": false,
+    "refreshTokens": [],
+    "createdAt": "2026-07-12T11:17:40.220Z",
+    "updatedAt": "2026-07-12T11:17:40.220Z"
+  },
+  {
+    "id": "791de2cb-fd75-495e-8255-a57e90b8df4d",
+    "fullName": "Demo User",
+    "email": "demo1783855287900@example.com",
+    "password": "$2a$12$gu6hG/KgMS81oKPCwGcHGeSGtIrFsw.TM//lzJ8eMql1NE1EnP2k6",
+    "role": "user",
+    "isActive": true,
+    "isEmailVerified": false,
+    "refreshTokens": [],
+    "createdAt": "2026-07-12T11:21:38.697Z",
+    "updatedAt": "2026-07-12T11:21:38.697Z"
+  },
+  {
+    "id": "f4ca41eb-13e7-4870-a6a5-a0912b2185b3",
+    "fullName": "john",
+    "email": "karanampavan00@gmail.com",
+    "password": "$2a$12$R7LVQqrpNUYPMhrfGXe9x.k9R1go0FpvUOnDa3o792GNvPPMtpyjG",
+    "role": "user",
+    "isActive": true,
+    "isEmailVerified": false,
+    "refreshTokens": [],
+    "createdAt": "2026-07-12T11:25:21.242Z",
+    "updatedAt": "2026-07-12T11:25:21.242Z"
+  },
+  {
+    "id": "58f7a6db-28d0-4b40-b570-008954429dc5",
+    "fullName": "Test User",
+    "email": "testuser@example.com",
+    "password": "$2a$12$FCeOwhte9lUVp302fIw30uVICQWjBzaRfcXgneKz9pUSiYbkAVkka",
+    "role": "user",
+    "isActive": true,
+    "isEmailVerified": false,
+    "refreshTokens": [],
+    "createdAt": "2026-07-12T11:44:32.151Z",
+    "updatedAt": "2026-07-12T11:44:32.151Z"
+  }
+]

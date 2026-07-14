@@ -7,7 +7,11 @@ const categorySchema = new mongoose.Schema(
         description: { type: String },
         icon: { type: String },
         bannerImage: { type: String },
+        popularAuthors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Author' }],
+        books: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }],
+        totalBooks: { type: Number, default: 0 },
         isFeatured: { type: Boolean, default: false },
+        isTrending: { type: Boolean, default: false },
         isActive: { type: Boolean, default: true },
         seo: { metaTitle: String, metaDescription: String, keywords: [String] },
         bookCount: { type: Number, default: 0 },
@@ -17,7 +21,6 @@ const categorySchema = new mongoose.Schema(
 
 categorySchema.index({ name: 1 }, { unique: true });
 categorySchema.index({ slug: 1 }, { unique: true });
-
 
 categorySchema.pre('save', function (next) {
     if (!this.slug) {

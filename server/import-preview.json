@@ -1,0 +1,666 @@
+{
+  "categories": [
+    {
+      "category": "Fiction",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Fantasy",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Romance",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Mystery",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Thriller",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Science",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Technology",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Programming",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Java",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Python",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "JavaScript",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "React",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Node.js",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "MongoDB",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Artificial Intelligence",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Machine Learning",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Data Science",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "History",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Biography",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Business",
+      "count": 0,
+      "source": "open-library"
+    },
+    {
+      "category": "Finance",
+      "count": 0,
+      "source": "open-library"
+    },
+    {
+      "category": "Self Help",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Psychology",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Health",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Children",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Philosophy",
+      "count": 20,
+      "source": "open-library"
+    },
+    {
+      "category": "Education",
+      "count": 20,
+      "source": "open-library"
+    }
+  ],
+  "sampleBooks": [
+    {
+      "title": "The Summer I Turned Pretty Trilogy",
+      "author": "Jenny Han",
+      "category": "Fiction",
+      "price": 1380,
+      "source": "open-library"
+    },
+    {
+      "title": "The Picture of Dorian Gray",
+      "author": "Oscar Wilde",
+      "category": "Fiction",
+      "price": 540,
+      "source": "open-library"
+    },
+    {
+      "title": "Shatter Me",
+      "author": "Tahereh Mafi",
+      "category": "Fiction",
+      "price": 700,
+      "source": "open-library"
+    },
+    {
+      "title": "The Blade Itself",
+      "author": "Joe Abercrombie",
+      "category": "Fantasy",
+      "price": 1000,
+      "source": "open-library"
+    },
+    {
+      "title": "The Hero of Ages",
+      "author": "Brandon Sanderson",
+      "category": "Fantasy",
+      "price": 1350,
+      "source": "open-library"
+    },
+    {
+      "title": "The Lies of Locke Lamora",
+      "author": "Scott Lynch",
+      "category": "Fantasy",
+      "price": 1020,
+      "source": "open-library"
+    },
+    {
+      "title": "Um casamento arranjado",
+      "author": "Zana Kheiron",
+      "category": "Romance",
+      "price": 390,
+      "source": "open-library"
+    },
+    {
+      "title": "Twisted Games",
+      "author": "Ana Huang",
+      "category": "Romance",
+      "price": 800,
+      "source": "open-library"
+    },
+    {
+      "title": "Twisted Love",
+      "author": "Ana Huang",
+      "category": "Romance",
+      "price": 660,
+      "source": "open-library"
+    },
+    {
+      "title": "The Man in the Brown Suit",
+      "author": "Agatha Christie",
+      "category": "Mystery",
+      "price": 520,
+      "source": "open-library"
+    },
+    {
+      "title": "The Secret of Chimneys",
+      "author": "Agatha Christie",
+      "category": "Mystery",
+      "price": 560,
+      "source": "open-library"
+    },
+    {
+      "title": "Never Lie",
+      "author": "Freida McFadden",
+      "category": "Mystery",
+      "price": 660,
+      "source": "open-library"
+    },
+    {
+      "title": "The Silent Patient",
+      "author": "Alex Michaelides",
+      "category": "Thriller",
+      "price": 750,
+      "source": "open-library"
+    },
+    {
+      "title": "The Housemaid",
+      "author": "Freida McFadden",
+      "category": "Thriller",
+      "price": 720,
+      "source": "open-library"
+    },
+    {
+      "title": "Never Lie",
+      "author": "Freida McFadden",
+      "category": "Thriller",
+      "price": 700,
+      "source": "open-library"
+    },
+    {
+      "title": "Biology",
+      "author": "Neil Alexander Campbell",
+      "category": "Science",
+      "price": 1550,
+      "source": "open-library"
+    },
+    {
+      "title": "The Fall of Hyperion",
+      "author": "Dan Simmons",
+      "category": "Science",
+      "price": 1110,
+      "source": "open-library"
+    },
+    {
+      "title": "Death's End (The Three-Body Problem Series Book 3)",
+      "author": "刘慈欣",
+      "category": "Science",
+      "price": 1380,
+      "source": "open-library"
+    },
+    {
+      "title": "Elon Musk",
+      "author": "Ashlee Vance",
+      "category": "Technology",
+      "price": 890,
+      "source": "open-library"
+    },
+    {
+      "title": "Hello world",
+      "author": "Hannah Fry",
+      "category": "Technology",
+      "price": 650,
+      "source": "open-library"
+    },
+    {
+      "title": "Dark Matter",
+      "author": "Blake Crouch",
+      "category": "Technology",
+      "price": 830,
+      "source": "open-library"
+    },
+    {
+      "title": "Bobby Fischer Teaches Chess",
+      "author": "Bobby Fischer",
+      "category": "Programming",
+      "price": 800,
+      "source": "open-library"
+    },
+    {
+      "title": "Automate the Boring Stuff with Python",
+      "author": "Al Sweigart",
+      "category": "Programming",
+      "price": 1100,
+      "source": "open-library"
+    },
+    {
+      "title": "The Mythical Man-Month",
+      "author": "Frederick P. Brooks",
+      "category": "Programming",
+      "price": 560,
+      "source": "open-library"
+    },
+    {
+      "title": "Head First design patterns",
+      "author": "Eric Freeman",
+      "category": "Java",
+      "price": 1330,
+      "source": "open-library"
+    },
+    {
+      "title": "Java",
+      "author": "Herbert Schildt",
+      "category": "Java",
+      "price": 1590,
+      "source": "open-library"
+    },
+    {
+      "title": "Big Java",
+      "author": "Cay S. Horstmann",
+      "category": "Java",
+      "price": 1590,
+      "source": "open-library"
+    },
+    {
+      "title": "Automate the Boring Stuff with Python",
+      "author": "Al Sweigart",
+      "category": "Python",
+      "price": 1040,
+      "source": "open-library"
+    },
+    {
+      "title": "Learning Python",
+      "author": "Mark Lutz",
+      "category": "Python",
+      "price": 1180,
+      "source": "open-library"
+    },
+    {
+      "title": "Python crash course",
+      "author": "Eric Matthes",
+      "category": "Python",
+      "price": 1100,
+      "source": "open-library"
+    },
+    {
+      "title": "Eloquent Javascript",
+      "author": "Marijn Haverbeke",
+      "category": "JavaScript",
+      "price": 950,
+      "source": "open-library"
+    },
+    {
+      "title": "JavaScript",
+      "author": "Douglas Crockford",
+      "category": "JavaScript",
+      "price": 520,
+      "source": "open-library"
+    },
+    {
+      "title": "JavaScript",
+      "author": "Don Gosselin",
+      "category": "JavaScript",
+      "price": 1390,
+      "source": "open-library"
+    },
+    {
+      "title": "Learning Patterns",
+      "author": "Lydia Hallie",
+      "category": "React",
+      "price": 920,
+      "source": "open-library"
+    },
+    {
+      "title": "React.js Succinctly",
+      "author": "Samer Buna",
+      "category": "React",
+      "price": 370,
+      "source": "open-library"
+    },
+    {
+      "title": "Learning React",
+      "author": "Kirupa Chinnathambi",
+      "category": "React",
+      "price": 600,
+      "source": "open-library"
+    },
+    {
+      "title": "Professional NodeJs",
+      "author": "Pedro Teixeira",
+      "category": "Node.js",
+      "price": 900,
+      "source": "open-library"
+    },
+    {
+      "title": "Beginning Node.js",
+      "author": "Basarat Syed",
+      "category": "Node.js",
+      "price": 730,
+      "source": "open-library"
+    },
+    {
+      "title": "Node.js in Action",
+      "author": "Alex R. Young",
+      "category": "Node.js",
+      "price": 870,
+      "source": "open-library"
+    },
+    {
+      "title": "MongoDB Cookbook",
+      "author": "Amol Nayak",
+      "category": "MongoDB",
+      "price": 570,
+      "source": "open-library"
+    },
+    {
+      "title": "MongoDB 3 Succinctly",
+      "author": "Zoran Maksimovic",
+      "category": "MongoDB",
+      "price": 390,
+      "source": "open-library"
+    },
+    {
+      "title": "MongoDB in action",
+      "author": "Kyle Banker",
+      "category": "MongoDB",
+      "price": 690,
+      "source": "open-library"
+    },
+    {
+      "title": "Surface Detail",
+      "author": "Iain Banks",
+      "category": "Artificial Intelligence",
+      "price": 1340,
+      "source": "open-library"
+    },
+    {
+      "title": "Accelerando",
+      "author": "Charles Stross",
+      "category": "Artificial Intelligence",
+      "price": 1010,
+      "source": "open-library"
+    },
+    {
+      "title": "AI Engineering",
+      "author": "Chip Huyen",
+      "category": "Artificial Intelligence",
+      "price": 1000,
+      "source": "open-library"
+    },
+    {
+      "title": "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow",
+      "author": "Aurélien Géron",
+      "category": "Machine Learning",
+      "price": 1670,
+      "source": "open-library"
+    },
+    {
+      "title": "Deep Learning",
+      "author": "Ian Goodfellow",
+      "category": "Machine Learning",
+      "price": 1620,
+      "source": "open-library"
+    },
+    {
+      "title": "Artificial Intelligence",
+      "author": "Melanie Mitchell",
+      "category": "Machine Learning",
+      "price": 810,
+      "source": "open-library"
+    },
+    {
+      "title": "Invisible Women",
+      "author": "Caroline Criado Perez",
+      "category": "Data Science",
+      "price": 900,
+      "source": "open-library"
+    },
+    {
+      "title": "Data Science for Business",
+      "author": "Foster Provost",
+      "category": "Data Science",
+      "price": 870,
+      "source": "open-library"
+    },
+    {
+      "title": "Computer Science",
+      "author": "Carl French",
+      "category": "Data Science",
+      "price": 1140,
+      "source": "open-library"
+    },
+    {
+      "title": "Debt",
+      "author": "David Graeber",
+      "category": "History",
+      "price": 950,
+      "source": "open-library"
+    },
+    {
+      "title": "The Story of Philosophy",
+      "author": "Will Durant",
+      "category": "History",
+      "price": 950,
+      "source": "open-library"
+    },
+    {
+      "title": "A People's History of the United States",
+      "author": "Howard Zinn",
+      "category": "History",
+      "price": 1150,
+      "source": "open-library"
+    },
+    {
+      "title": "Wings of Fire",
+      "author": "A. P. J. Abdul Kalam",
+      "category": "Biography",
+      "price": 450,
+      "source": "open-library"
+    },
+    {
+      "title": "The Diary of a Young Girl- Anne Frank",
+      "author": "Anne Frank",
+      "category": "Biography",
+      "price": 660,
+      "source": "open-library"
+    },
+    {
+      "title": "Autobiography of a Yogi",
+      "author": "Yogananda Paramahansa",
+      "category": "Biography",
+      "price": 950,
+      "source": "open-library"
+    },
+    {
+      "title": "The Power of Your Subconscious Mind",
+      "author": "Joseph Murphy",
+      "category": "Self Help",
+      "price": 510,
+      "source": "open-library"
+    },
+    {
+      "title": "Don't Believe Everything You Think",
+      "author": "Joseph Nguyen",
+      "category": "Self Help",
+      "price": 500,
+      "source": "open-library"
+    },
+    {
+      "title": "12 Rules for Life",
+      "author": "Jordan B. Peterson",
+      "category": "Self Help",
+      "price": 880,
+      "source": "open-library"
+    },
+    {
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "category": "Psychology",
+      "price": 670,
+      "source": "open-library"
+    },
+    {
+      "title": "The Power of Your Subconscious Mind",
+      "author": "Joseph Murphy",
+      "category": "Psychology",
+      "price": 520,
+      "source": "open-library"
+    },
+    {
+      "title": "Mindset",
+      "author": "Carol S. Dweck",
+      "category": "Psychology",
+      "price": 620,
+      "source": "open-library"
+    },
+    {
+      "title": "Come as you are",
+      "author": "Emily Nagoski",
+      "category": "Health",
+      "price": 810,
+      "source": "open-library"
+    },
+    {
+      "title": "Light on Yoga",
+      "author": "B. K. S. Iyengar",
+      "category": "Health",
+      "price": 800,
+      "source": "open-library"
+    },
+    {
+      "title": "Why We Sleep",
+      "author": "Matthew P. Walker",
+      "category": "Health",
+      "price": 710,
+      "source": "open-library"
+    },
+    {
+      "title": "Alice in Wonderland in Five Acts",
+      "author": "Lewis Carroll",
+      "category": "Children",
+      "price": 250,
+      "source": "open-library"
+    },
+    {
+      "title": "Fantastic Mr Fox",
+      "author": "Roald Dahl",
+      "category": "Children",
+      "price": 290,
+      "source": "open-library"
+    },
+    {
+      "title": "The Book of Dragons",
+      "author": "Edith Nesbit",
+      "category": "Children",
+      "price": 310,
+      "source": "open-library"
+    },
+    {
+      "title": "The Story of Philosophy",
+      "author": "Will Durant",
+      "category": "Philosophy",
+      "price": 970,
+      "source": "open-library"
+    },
+    {
+      "title": "Jenseits von Gut und Böse",
+      "author": "Friedrich Nietzsche",
+      "category": "Philosophy",
+      "price": 440,
+      "source": "open-library"
+    },
+    {
+      "title": "Tao te Ching",
+      "author": "老子",
+      "category": "Philosophy",
+      "price": 360,
+      "source": "open-library"
+    },
+    {
+      "title": "$100M Offers",
+      "author": "Alex Hormozi",
+      "category": "Education",
+      "price": 410,
+      "source": "open-library"
+    },
+    {
+      "title": "Manajemen keuangan",
+      "author": "Rahmini Hadi",
+      "category": "Education",
+      "price": 450,
+      "source": "open-library"
+    },
+    {
+      "title": "Ilmu pendidikan Islam",
+      "author": "Zakiah Daradjat",
+      "category": "Education",
+      "price": 390,
+      "source": "open-library"
+    }
+  ]
+}

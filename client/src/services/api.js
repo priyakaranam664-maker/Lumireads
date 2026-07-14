@@ -13,7 +13,7 @@ API.interceptors.request.use((config) => {
     return config;
 });
 
-// Response interceptor - handle token refresh
+// Response interceptor - handle token refresh and transient rate-limit failures
 API.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -34,6 +34,13 @@ API.interceptors.response.use(
                 return Promise.reject(refreshError);
             }
         }
+
+        if ((error.response?.status === 429 || error.response?.status === 408) && !originalRequest._retry) {
+            originalRequest._retry = true;
+            await new Promise((resolve) => setTimeout(resolve, 600));
+            return API(originalRequest);
+        }
+
         return Promise.reject(error);
     }
 );
@@ -170,6 +177,7 @@ export const adminAPI = {
 // General APIs
 export const generalAPI = {
     getBanners: (params) => API.get('/banners', { params }),
+    getLiveStats: () => API.get('/live-stats'),
     submitContact: (data) => API.post('/contact', data),
     getNotifications: () => API.get('/notifications'),
     markRead: (id) => API.put(`/notifications/${id}/read`),

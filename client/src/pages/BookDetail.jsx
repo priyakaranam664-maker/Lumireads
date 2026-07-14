@@ -1,328 +1,539 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Tab, Tabs } from 'react-bootstrap';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { FiShoppingCart, FiHeart, FiStar, FiShare2, FiMinus, FiPlus, FiCheck, FiBook, FiGlobe, FiLayers, FiArrowLeft } from 'react-icons/fi';
+import { motion, useInView } from 'framer-motion';
+import {
+  FiShoppingCart, FiHeart, FiStar, FiShare2, FiMinus, FiPlus,
+  FiCheck, FiBook, FiGlobe, FiLayers, FiArrowLeft, FiTruck,
+  FiRefreshCw, FiShield, FiChevronLeft, FiChevronRight, FiUser
+} from 'react-icons/fi';
 import BookCard from '../components/BookCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { bookAPI, reviewAPI, userAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import '../styles/book-detail-premium.css';
 
+/* ─── Stars renderer ────────────────────────────────────── */
+const Stars = ({ rating, size = 15 }) =>
+  Array.from({ length: 5 }, (_, i) => (
+    <FiStar
+      key={i}
+      size={size}
+      fill={i < Math.round(rating) ? '#FBBF24' : 'none'}
+      style={{ color: i < Math.round(rating) ? '#FBBF24' : 'var(--text-muted)' }}
+    />
+  ));
+
+/* ─── Horizontal related rail ───────────────────────────── */
+const RelatedRail = ({ books }) => {
+  const ref = useRef(null);
+  const scroll = (d) => ref.current?.scrollBy({ left: d * 270, behavior: 'smooth' });
+  if (!books?.length) return null;
+  return (
+    <div className="bd-rail-wrapper">
+      <button className="bd-rail-arrow bd-rail-arrow-left" onClick={() => scroll(-1)} aria-label="Scroll left">
+        <FiChevronLeft size={18} />
+      </button>
+      <div className="bd-rail" ref={ref}>
+        {books.map((b) => (
+          <div className="bd-rail-item" key={b._id}>
+            <BookCard book={b} />
+          </div>
+        ))}
+      </div>
+      <button className="bd-rail-arrow bd-rail-arrow-right" onClick={() => scroll(1)} aria-label="Scroll right">
+        <FiChevronRight size={18} />
+      </button>
+    </div>
+  );
+};
+
+/* ─── Review rating bar ─────────────────────────────────── */
+const RatingBar = ({ label, count, total }) => {
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <div className="bd-rating-bar-row">
+      <span className="bd-rating-bar-lbl">{label}★</span>
+      <div className="bd-rating-bar-track">
+        <div className="bd-rating-bar-fill" style={{ width: `${pct}%` }} />
+      </div>
+      <span className="bd-rating-bar-pct">{pct}%</span>
+    </div>
+  );
+};
+
+/* ─── FadeIn wrapper ────────────────────────────────────── */
+const FadeIn = ({ children, delay = 0 }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-60px 0px' });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 28 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   BOOK DETAIL COMPONENT
+═══════════════════════════════════════════════════════════ */
 const BookDetail = () => {
-    const { identifier } = useParams();
-    const { isAuthenticated, user, updateUser } = useAuth();
-    const { cart, addToCart } = useCart();
-    const navigate = useNavigate();
-    const [book, setBook] = useState(null);
-    const [reviews, setReviews] = useState([]);
-    const [relatedBooks, setRelatedBooks] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [qty, setQty] = useState(1);
-    const [reviewText, setReviewText] = useState('');
-    const [reviewRating, setReviewRating] = useState(5);
-    const [submitting, setSubmitting] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(0);
+  const { identifier } = useParams();
+  const { isAuthenticated, user, updateUser } = useAuth();
+  const { cart, addToCart } = useCart();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchBook = async () => {
-            setLoading(true);
-            try {
-                const { data } = await bookAPI.getBook(identifier);
-                const bookData = data.data.book || data.data;
-                setBook(bookData);
-                setSelectedImage(0);
-                // Use relatedBooks from the API response if available
-                if (data.data.relatedBooks) {
-                    setRelatedBooks(data.data.relatedBooks.filter((b) => b._id !== bookData._id));
-                }
-                // Fetch reviews
-                const revRes = await reviewAPI.getBookReviews(bookData._id, { limit: 10 });
-                setReviews(revRes.data.data);
-            } catch { toast.error('Book not found'); }
-            finally { setLoading(false); }
-        };
-        fetchBook();
-        window.scrollTo(0, 0);
-    }, [identifier]);
+  const [book, setBook] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [relatedBooks, setRelatedBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [qty, setQty] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('description');
 
-    const isInWishlist = user?.wishlist?.some((w) => (w._id || w) === book?._id);
-    const isAlreadyInCart = cart?.items?.some((item) => (item.book?._id || item.book) === book?._id);
-
-    const handleWishlist = async () => {
-        if (!isAuthenticated) { toast.error('Please login first'); return; }
-        try {
-            const { data } = await userAPI.toggleWishlist(book._id);
-            updateUser({ wishlist: data.data });
-            toast.success(data.message);
-        } catch { }
-    };
-
-    const handleAddToCart = () => {
-        if (!isAuthenticated) { toast.error('Please login first'); return; }
-        addToCart(book._id, qty);
-    };
-
-    const handleBuyNow = async () => {
-        if (!isAuthenticated) { toast.error('Please login first'); return; }
-        try {
-            if (!isAlreadyInCart) {
-                await addToCart(book._id, qty);
-            }
-            navigate('/checkout');
-        } catch {
-            toast.error('Buy Now failed');
+  useEffect(() => {
+    const fetchBook = async () => {
+      setLoading(true);
+      try {
+        const { data } = await bookAPI.getBook(identifier);
+        const bookData = data.data.book || data.data;
+        setBook(bookData);
+        setSelectedImage(0);
+        if (data.data.relatedBooks) {
+          setRelatedBooks(data.data.relatedBooks.filter((b) => b._id !== bookData._id));
         }
+        const revRes = await reviewAPI.getBookReviews(bookData._id, { limit: 20 });
+        setReviews(revRes.data.data || []);
+      } catch {
+        toast.error('Book not found');
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchBook();
+    window.scrollTo(0, 0);
+  }, [identifier]);
 
-    const handleReviewSubmit = async (e) => {
-        e.preventDefault();
-        if (!isAuthenticated) { toast.error('Please login first'); return; }
-        setSubmitting(true);
-        try {
-            const { data } = await reviewAPI.create(book._id, { rating: reviewRating, comment: reviewText });
-            setReviews((prev) => [data.data, ...prev]);
-            setReviewText(''); setReviewRating(5);
-            toast.success('Review submitted!');
-        } catch (err) { toast.error(err.response?.data?.message || 'Failed to submit review'); }
-        finally { setSubmitting(false); }
-    };
+  const isInWishlist = user?.wishlist?.some((w) => (w._id || w) === book?._id);
+  const isAlreadyInCart = cart?.items?.some((item) => (item.book?._id || item.book) === book?._id);
 
-    const renderStars = (rating, size = 16) => {
-        return Array.from({ length: 5 }, (_, i) => (
-            <FiStar key={i} size={size} className={i < Math.round(rating) ? 'star-filled' : 'star-empty'}
-                fill={i < Math.round(rating) ? '#FBBF24' : 'none'} />
-        ));
-    };
+  const handleWishlist = useCallback(async () => {
+    if (!isAuthenticated) { toast.error('Please login first'); return; }
+    try {
+      const { data } = await userAPI.toggleWishlist(book._id);
+      updateUser({ wishlist: data.data });
+      toast.success(data.message);
+    } catch { toast.error('Wishlist action failed'); }
+  }, [isAuthenticated, book, updateUser]);
 
-    if (loading) return <LoadingSpinner />;
-    if (!book) return <div className="empty-state"><h3>Book not found</h3></div>;
+  const handleAddToCart = useCallback(() => {
+    if (!isAuthenticated) { toast.error('Please login first'); return; }
+    addToCart(book._id, qty);
+  }, [isAuthenticated, book, qty, addToCart]);
 
-    const allImages = [book.coverImage, ...(book.galleryImages || [])];
+  const handleBuyNow = useCallback(async () => {
+    if (!isAuthenticated) { toast.error('Please login first'); return; }
+    try {
+      if (!isAlreadyInCart) await addToCart(book._id, qty);
+      navigate('/checkout');
+    } catch { toast.error('Buy Now failed'); }
+  }, [isAuthenticated, book, qty, isAlreadyInCart, addToCart, navigate]);
 
-    return (
-        <>
-            <Helmet><title>{`${book.title} - BookStore`}</title></Helmet>
-            <div className="page-header">
-                <Container>
-                    <div className="breadcrumb-custom">
-                        <Link to="/">Home</Link><span>/</span><Link to="/books">Books</Link><span>/</span>
-                        <span style={{ color: 'white' }}>{book.title}</span>
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) { toast.error('Please login first'); return; }
+    setSubmitting(true);
+    try {
+      const { data } = await reviewAPI.create(book._id, { rating: reviewRating, comment: reviewText });
+      setReviews((prev) => [data.data, ...prev]);
+      setReviewText(''); setReviewRating(5);
+      toast.success('Review submitted!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit review');
+    } finally { setSubmitting(false); }
+  };
+
+  if (loading) return <LoadingSpinner />;
+  if (!book) return <div className="bd-not-found"><h3>Book not found</h3></div>;
+
+  const allImages = [book.coverImage, ...(book.galleryImages || [])].filter(Boolean);
+
+  // Rating distribution (fake split based on averageRating for visual)
+  const total = book.totalReviews || 0;
+  const avg = book.averageRating || 0;
+  const ratingDist = [5, 4, 3, 2, 1].map((star) => {
+    const weight = Math.max(0, 1 - Math.abs(star - avg) * 0.4);
+    const count = Math.round(weight * total * 0.4);
+    return { star, count };
+  });
+
+  return (
+    <>
+      <Helmet>
+        <title>{`${book.title} — LumiReads`}</title>
+        <meta name="description" content={book.description?.slice(0, 155)} />
+      </Helmet>
+
+      {/* ══════════════ HERO BACKDROP ══════════════ */}
+      <div className="bd-hero-backdrop">
+        <div
+          className="bd-hero-bg-blur"
+          style={{ backgroundImage: `url(${book.coverImage})` }}
+        />
+        <div className="bd-hero-overlay" />
+        <div className="bd-hero-content">
+          <button className="bd-back-btn" onClick={() => navigate(-1)}>
+            <FiArrowLeft size={16} /> Back to Catalog
+          </button>
+          {book.category && (
+            <span className="bd-hero-category">{book.category.name}</span>
+          )}
+          <h1 className="bd-hero-title">{book.title}</h1>
+          {book.subtitle && <p className="bd-hero-subtitle">{book.subtitle}</p>}
+          <div className="bd-hero-meta">
+            <Link to={`/authors/${book.author?.slug || book.author?._id}`} className="bd-hero-author">
+              by {book.author?.name}
+            </Link>
+            <div className="bd-hero-rating">
+              <Stars rating={avg} size={14} />
+              <span>{avg?.toFixed(1)} ({total} reviews)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════ MAIN CONTENT ══════════════ */}
+      <div className="bd-main">
+        <div className="bd-container">
+          <div className="bd-layout">
+
+            {/* ─── Left: Image gallery + book info ─── */}
+            <div className="bd-left">
+              {/* Gallery */}
+              <motion.div
+                className="bd-gallery"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="bd-main-img">
+                  <img src={allImages[selectedImage]} alt={book.title} />
+                  {book.discountPercent > 0 && (
+                    <span className="bd-img-badge">{book.discountPercent}% OFF</span>
+                  )}
+                </div>
+                {allImages.length > 1 && (
+                  <div className="bd-thumb-strip">
+                    {allImages.map((img, i) => (
+                      <button
+                        key={i}
+                        className={`bd-thumb ${i === selectedImage ? 'active' : ''}`}
+                        onClick={() => setSelectedImage(i)}
+                      >
+                        <img src={img} alt="" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Book details grid */}
+              <FadeIn delay={0.05}>
+                <div className="bd-details-grid">
+                  {[
+                    { icon: FiBook, label: 'Format', value: book.format || 'Paperback' },
+                    { icon: FiLayers, label: 'Pages', value: book.pages },
+                    { icon: FiGlobe, label: 'Language', value: book.language },
+                    { icon: FiBook, label: 'ISBN', value: book.isbn },
+                  ].filter(d => d.value).map(({ icon: Icon, label, value }) => (
+                    <div className="bd-detail-item" key={label}>
+                      <Icon size={16} className="bd-detail-icon" />
+                      <div className="bd-detail-lbl">{label}</div>
+                      <div className="bd-detail-val">{value}</div>
                     </div>
-                </Container>
+                  ))}
+                </div>
+              </FadeIn>
+
+              {/* Guarantees */}
+              <FadeIn delay={0.1}>
+                <div className="bd-guarantees">
+                  {[
+                    { icon: FiTruck, text: 'Free shipping on orders ₹499+' },
+                    { icon: FiRefreshCw, text: '7-day easy returns' },
+                    { icon: FiShield, text: 'Secure encrypted checkout' },
+                  ].map(({ icon: Icon, text }) => (
+                    <div className="bd-guarantee-item" key={text}>
+                      <Icon size={14} /> {text}
+                    </div>
+                  ))}
+                </div>
+              </FadeIn>
             </div>
 
-            <Container className="py-4">
-                <div className="mb-3">
+            {/* ─── Center: Description + Reviews ─── */}
+            <div className="bd-center">
+              {/* Tabs */}
+              <FadeIn>
+                <div className="bd-tabs">
+                  {['description', 'reviews'].map((tab) => (
                     <button
-                        onClick={() => navigate(-1)}
-                        className="btn-back-link"
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--primary)',
-                            fontWeight: 650,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
-                            cursor: 'pointer',
-                            padding: 0,
-                            fontSize: '0.9rem',
-                            transition: 'color 0.2s ease'
-                        }}
+                      key={tab}
+                      className={`bd-tab-btn ${activeTab === tab ? 'active' : ''}`}
+                      onClick={() => setActiveTab(tab)}
                     >
-                        <FiArrowLeft size={16} /> Back to Catalog
+                      {tab === 'description' ? 'Description' : `Reviews (${total})`}
                     </button>
+                  ))}
                 </div>
-                <Row className="g-4">
-                    {/* Images */}
-                    <Col lg={5}>
-                        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                            <div className="book-detail-img mb-3">
-                                <img src={allImages[selectedImage]} alt={book.title} style={{ width: '100%', borderRadius: 'var(--radius-lg)' }} />
+              </FadeIn>
+
+              {activeTab === 'description' && (
+                <FadeIn delay={0.05}>
+                  <div className="bd-description">
+                    <p>{book.description || 'No description available.'}</p>
+                    {book.publisher && (
+                      <p className="bd-desc-meta"><strong>Publisher:</strong> {book.publisher.name}</p>
+                    )}
+                    {book.edition && (
+                      <p className="bd-desc-meta"><strong>Edition:</strong> {book.edition}</p>
+                    )}
+                    {book.tags?.length > 0 && (
+                      <div className="bd-tags">
+                        {book.tags.map((tag) => (
+                          <span key={tag} className="bd-tag">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </FadeIn>
+              )}
+
+              {activeTab === 'reviews' && (
+                <FadeIn delay={0.05}>
+                  <div className="bd-reviews-section">
+                    {/* Rating overview */}
+                    {total > 0 && (
+                      <div className="bd-rating-overview">
+                        <div className="bd-rating-big">
+                          <span className="bd-rating-score">{avg?.toFixed(1)}</span>
+                          <div className="bd-rating-stars-big">
+                            <Stars rating={avg} size={20} />
+                          </div>
+                          <span className="bd-rating-total">{total} reviews</span>
+                        </div>
+                        <div className="bd-rating-bars">
+                          {ratingDist.map(({ star, count }) => (
+                            <RatingBar key={star} label={star} count={count} total={total} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Write a review */}
+                    {isAuthenticated && (
+                      <form className="bd-review-form" onSubmit={handleReviewSubmit}>
+                        <h4 className="bd-review-form-title">Write a Review</h4>
+                        <div className="bd-star-picker">
+                          {[1, 2, 3, 4, 5].map((r) => (
+                            <FiStar
+                              key={r}
+                              size={26}
+                              fill={r <= (hoverRating || reviewRating) ? '#FBBF24' : 'none'}
+                              style={{
+                                color: r <= (hoverRating || reviewRating) ? '#FBBF24' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                transition: 'color 0.15s, transform 0.15s',
+                                transform: r <= (hoverRating || reviewRating) ? 'scale(1.15)' : 'scale(1)',
+                              }}
+                              onMouseEnter={() => setHoverRating(r)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              onClick={() => setReviewRating(r)}
+                            />
+                          ))}
+                          <span className="bd-star-label">{reviewRating} / 5</span>
+                        </div>
+                        <textarea
+                          className="bd-review-textarea"
+                          rows={4}
+                          placeholder="Share your thoughts about this book..."
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          required
+                        />
+                        <button type="submit" className="bd-review-submit" disabled={submitting}>
+                          {submitting ? 'Submitting...' : 'Submit Review'}
+                        </button>
+                      </form>
+                    )}
+
+                    {/* Review list */}
+                    <div className="bd-review-list">
+                      {reviews.length === 0 ? (
+                        <p className="bd-no-reviews">No reviews yet. Be the first!</p>
+                      ) : (
+                        reviews.map((rev) => (
+                          <div key={rev._id} className="bd-review-card">
+                            <div className="bd-review-header">
+                              <div className="bd-review-avatar">
+                                {rev.user?.fullName?.charAt(0) || <FiUser size={16} />}
+                              </div>
+                              <div className="bd-review-meta">
+                                <strong className="bd-reviewer-name">{rev.user?.fullName}</strong>
+                                <div className="bd-review-stars">
+                                  <Stars rating={rev.rating} size={12} />
+                                </div>
+                              </div>
+                              <span className="bd-review-date">
+                                {new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </span>
                             </div>
-                            {allImages.length > 1 && (
-                                <div className="d-flex gap-2">
-                                    {allImages.map((img, i) => (
-                                        <img key={i} src={img} alt="" onClick={() => setSelectedImage(i)}
-                                            style={{
-                                                width: 60, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-                                                border: i === selectedImage ? '2px solid var(--primary)' : '2px solid var(--border-color)', opacity: i === selectedImage ? 1 : 0.6
-                                            }} />
-                                    ))}
-                                </div>
-                            )}
-                        </motion.div>
-                    </Col>
+                            <p className="bd-review-text">{rev.comment}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </FadeIn>
+              )}
+            </div>
 
-                    {/* Info */}
-                    <Col lg={7}>
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                            {book.category && <span className="tag mb-2">{book.category.name}</span>}
-                            <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{book.title}</h1>
-                            {book.subtitle && <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>{book.subtitle}</p>}
-
-                            <div className="d-flex align-items-center gap-3 mb-3">
-                                <Link to={`/authors/${book.author?.slug || book.author?._id}`} style={{ fontWeight: 600, color: 'var(--primary)' }}>
-                                    by {book.author?.name}
-                                </Link>
-                                <div className="d-flex align-items-center gap-1">
-                                    {renderStars(book.averageRating)}
-                                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)', marginLeft: '0.3rem' }}>
-                                        {book.averageRating?.toFixed(1)} ({book.totalReviews} reviews)
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Price */}
-                            <div style={{ background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
-                                <div className="d-flex align-items-baseline gap-3">
-                                    <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)' }}>₹{book.finalPrice}</span>
-                                    {book.discountPercent > 0 && (
-                                        <>
-                                            <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>₹{book.price}</span>
-                                            <span style={{ background: 'var(--success)', color: 'white', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', fontWeight: 700 }}>
-                                                {book.discountPercent}% OFF
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 0, marginTop: '0.3rem' }}>Inclusive of all taxes</p>
-                            </div>
-
-                            {/* Details Grid */}
-                            <Row className="g-3 mb-4">
-                                {[
-                                    { icon: FiBook, label: 'Format', value: book.format || 'Paperback' },
-                                    { icon: FiLayers, label: 'Pages', value: book.pages },
-                                    { icon: FiGlobe, label: 'Language', value: book.language },
-                                    { icon: FiBook, label: 'ISBN', value: book.isbn },
-                                ].map(({ icon: Icon, label, value }, i) => value && (
-                                    <Col xs={6} md={3} key={i}>
-                                        <div style={{ textAlign: 'center', padding: '0.75rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                                            <Icon size={18} style={{ color: 'var(--primary)', marginBottom: '0.25rem' }} />
-                                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>{label}</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
-                                        </div>
-                                    </Col>
-                                ))}
-                            </Row>
-
-                            {/* Quantity & Actions */}
-                            <div className="d-flex align-items-center gap-3 mb-3 flex-wrap">
-                                <div className="d-flex align-items-center gap-2">
-                                    <button className="qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}><FiMinus size={14} /></button>
-                                    <span style={{ fontWeight: 700, fontSize: '1rem', width: 30, textAlign: 'center' }}>{qty}</span>
-                                    <button className="qty-btn" onClick={() => setQty(Math.min(book.stockQuantity, qty + 1))}><FiPlus size={14} /></button>
-                                </div>
-
-                                {isAlreadyInCart ? (
-                                    <button className="btn-primary-custom flex-grow-1" onClick={() => navigate('/cart')}
-                                        style={{ padding: '0.7rem', justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}>
-                                        <FiShoppingCart /> View Cart
-                                    </button>
-                                ) : (
-                                    <button className="btn-primary-custom flex-grow-1" onClick={handleAddToCart}
-                                        disabled={book.stockQuantity === 0} style={{ padding: '0.7rem', justifyContent: 'center' }}>
-                                        <FiShoppingCart /> {book.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock'}
-                                    </button>
-                                )}
-
-                                {book.stockQuantity > 0 && (
-                                    <button className="btn-primary-custom flex-grow-1" onClick={handleBuyNow}
-                                        style={{ padding: '0.7rem', justifyContent: 'center', background: 'var(--primary)', borderColor: 'var(--primary)' }}>
-                                        Buy Now
-                                    </button>
-                                )}
-
-                                <button className={`btn-icon ${isInWishlist ? 'active' : ''}`} onClick={handleWishlist}
-                                    style={{ width: 44, height: 44 }}>
-                                    <FiHeart size={18} fill={isInWishlist ? 'currentColor' : 'none'} />
-                                </button>
-
-                                <button className="btn-icon" style={{ width: 44, height: 44 }}
-                                    onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }}>
-                                    <FiShare2 size={18} />
-                                </button>
-                            </div>
-
-                            {book.stockQuantity > 0 && book.stockQuantity <= 10 && (
-                                <p style={{ color: 'var(--danger)', fontSize: '0.85rem', fontWeight: 600 }}>⚠️ Only {book.stockQuantity} left in stock</p>
-                            )}
-                            {book.stockQuantity > 0 && (
-                                <div className="d-flex align-items-center gap-2" style={{ color: 'var(--success)', fontSize: '0.85rem', fontWeight: 600 }}>
-                                    <FiCheck /> In Stock - Ships within 2-3 business days
-                                </div>
-                            )}
-                        </motion.div>
-                    </Col>
-                </Row>
-
-                {/* Tabs */}
-                <div className="mt-5" style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', padding: '1.5rem' }}>
-                    <Tabs defaultActiveKey="description" className="mb-4">
-                        <Tab eventKey="description" title="Description">
-                            <p style={{ lineHeight: 1.8, color: 'var(--text-secondary)' }}>{book.description}</p>
-                            {book.publisher && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}><strong>Publisher:</strong> {book.publisher.name}</p>}
-                            {book.edition && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}><strong>Edition:</strong> {book.edition}</p>}
-                            {book.tags?.length > 0 && (
-                                <div className="d-flex gap-2 flex-wrap mt-3">
-                                    {book.tags.map((tag) => <span key={tag} className="tag">#{tag}</span>)}
-                                </div>
-                            )}
-                        </Tab>
-
-                        <Tab eventKey="reviews" title={`Reviews (${book.totalReviews || 0})`}>
-                            {/* Review Form */}
-                            {isAuthenticated && (
-                                <form onSubmit={handleReviewSubmit} style={{ marginBottom: '2rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                                    <h6 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>Write a Review</h6>
-                                    <div className="d-flex gap-1 mb-2">
-                                        {[1, 2, 3, 4, 5].map((r) => (
-                                            <FiStar key={r} size={22} className={r <= reviewRating ? 'star-filled' : ''} fill={r <= reviewRating ? '#FBBF24' : 'none'}
-                                                style={{ cursor: 'pointer' }} onClick={() => setReviewRating(r)} />
-                                        ))}
-                                    </div>
-                                    <textarea className="form-input mb-2" rows={3} placeholder="Share your thoughts..." value={reviewText} onChange={(e) => setReviewText(e.target.value)} required />
-                                    <button type="submit" className="btn-primary-custom" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Review'}</button>
-                                </form>
-                            )}
-
-                            {reviews.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>No reviews yet. Be the first to review!</p> : (
-                                reviews.map((rev) => (
-                                    <div key={rev._id} style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-                                        <div className="d-flex justify-content-between align-items-center mb-1">
-                                            <div>
-                                                <strong style={{ fontSize: '0.9rem' }}>{rev.user?.fullName}</strong>
-                                                <div className="d-flex gap-0.5">{renderStars(rev.rating, 13)}</div>
-                                            </div>
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(rev.createdAt).toLocaleDateString()}</span>
-                                        </div>
-                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 0 }}>{rev.comment}</p>
-                                    </div>
-                                ))
-                            )}
-                        </Tab>
-                    </Tabs>
+            {/* ─── Right: Sticky Purchase Card ─── */}
+            <div className="bd-right">
+              <div className="bd-purchase-card">
+                {/* Price block */}
+                <div className="bd-price-block">
+                  <span className="bd-price-current">₹{book.finalPrice || book.price}</span>
+                  {book.discountPercent > 0 && (
+                    <>
+                      <span className="bd-price-original">₹{book.price}</span>
+                      <span className="bd-price-badge">{book.discountPercent}% OFF</span>
+                    </>
+                  )}
                 </div>
+                <p className="bd-price-note">Inclusive of all taxes</p>
 
-                {/* Related Books */}
-                {relatedBooks.length > 0 && (
-                    <section className="mt-5">
-                        <h2 className="section-title">You Might Also Like</h2>
-                        <p className="section-subtitle">Similar books in this category</p>
-                        <Row className="g-3">
-                            {relatedBooks.slice(0, 4).map((b) => (
-                                <Col xs={6} md={3} key={b._id}><BookCard book={b} /></Col>
-                            ))}
-                        </Row>
-                    </section>
+                {/* Stock status */}
+                {book.stockQuantity > 0 ? (
+                  <div className="bd-in-stock">
+                    <FiCheck size={14} /> In Stock &mdash; Ships in 2–3 days
+                  </div>
+                ) : (
+                  <div className="bd-out-stock">Out of Stock</div>
                 )}
-            </Container>
-        </>
-    );
+                {book.stockQuantity > 0 && book.stockQuantity <= 10 && (
+                  <p className="bd-low-stock">⚠️ Only {book.stockQuantity} left!</p>
+                )}
+
+                {/* Quantity selector */}
+                {book.stockQuantity > 0 && (
+                  <div className="bd-qty-row">
+                    <span className="bd-qty-label">Quantity</span>
+                    <div className="bd-qty-ctrl">
+                      <button className="bd-qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>
+                        <FiMinus size={13} />
+                      </button>
+                      <span className="bd-qty-val">{qty}</span>
+                      <button className="bd-qty-btn" onClick={() => setQty(Math.min(book.stockQuantity, qty + 1))}>
+                        <FiPlus size={13} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA buttons */}
+                <div className="bd-cta-stack">
+                  {isAlreadyInCart ? (
+                    <button className="bd-btn-cart active" onClick={() => navigate('/cart')}>
+                      <FiShoppingCart size={16} /> View Cart
+                    </button>
+                  ) : (
+                    <button
+                      className="bd-btn-cart"
+                      onClick={handleAddToCart}
+                      disabled={book.stockQuantity === 0}
+                    >
+                      <FiShoppingCart size={16} />
+                      {book.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+                    </button>
+                  )}
+
+                  {book.stockQuantity > 0 && (
+                    <button className="bd-btn-buy" onClick={handleBuyNow}>
+                      Buy Now
+                    </button>
+                  )}
+
+                  <div className="bd-action-row">
+                    <button
+                      className={`bd-btn-wish ${isInWishlist ? 'active' : ''}`}
+                      onClick={handleWishlist}
+                      title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    >
+                      <FiHeart size={16} fill={isInWishlist ? 'currentColor' : 'none'} />
+                      {isInWishlist ? 'Wishlisted' : 'Wishlist'}
+                    </button>
+                    <button
+                      className="bd-btn-share"
+                      onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }}
+                      title="Share"
+                    >
+                      <FiShare2 size={16} /> Share
+                    </button>
+                  </div>
+                </div>
+
+                {/* Author pill */}
+                {book.author && (
+                  <Link
+                    to={`/authors/${book.author.slug || book.author._id}`}
+                    className="bd-author-pill"
+                  >
+                    <div className="bd-author-avatar">
+                      <img src={book.author.photo || `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(book.author.name || 'author')}` } alt={book.author.name} />
+                    </div>
+                    <div>
+                      <div className="bd-author-pill-label">Author</div>
+                      <div className="bd-author-pill-name">{book.author.name}</div>
+                    </div>
+                    <FiArrowLeft size={14} style={{ transform: 'rotate(180deg)', marginLeft: 'auto', color: 'var(--text-muted)' }} />
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ══════════════ RELATED BOOKS ══════════════ */}
+          {relatedBooks.length > 0 && (
+            <FadeIn>
+              <section className="bd-related-section">
+                <div className="bd-related-header">
+                  <div>
+                    <span className="bd-related-pretitle">You Might Also Love</span>
+                    <h2 className="bd-related-title">Similar Books</h2>
+                  </div>
+                  <Link to={`/books?category=${book.category?._id}`} className="bd-related-link">
+                    More in {book.category?.name} <FiArrowLeft size={13} style={{ transform: 'rotate(180deg)' }} />
+                  </Link>
+                </div>
+                <RelatedRail books={relatedBooks} />
+              </section>
+            </FadeIn>
+          )}
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default BookDetail;

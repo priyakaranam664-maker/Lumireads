@@ -1,9 +1,10 @@
 const LoadingSpinner = ({ message = 'Loading...' }) => (
-    <div className="loading-spinner">
-        <div className="text-center">
-            <div className="spinner mx-auto mb-3"></div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{message}</p>
-        </div>
+    <div className="loading-state-card">
+        <div className="loading-state-shimmer" />
+        <div className="loading-state-shimmer short" />
+        <div className="loading-state-shimmer short" />
+        <p>{message}</p>
     </div>
 );
+
 export default LoadingSpinner;

@@ -27,22 +27,29 @@ const Categories = () => {
                 </Container>
             </div>
             <Container className="py-4">
-                <Row className="g-3">
-                    {(categories || []).map((cat, i) => (
-                        <Col xs={6} md={4} lg={3} key={cat._id}>
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                                <Link to={`/books?category=${cat._id}`} style={{ textDecoration: 'none' }}>
-                                    <div className="category-card" style={{ height: '100%' }}>
-                                        <div className="category-card-icon">{cat.icon || '📖'}</div>
-                                        <div className="category-card-name">{cat.name}</div>
-                                        <div className="category-card-count">{cat.bookCount || 0} Books</div>
-                                        {cat.description && <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: 0 }}>{cat.description}</p>}
-                                    </div>
-                                </Link>
-                            </motion.div>
-                        </Col>
-                    ))}
-                </Row>
+                {(!categories || categories.length === 0) ? (
+                    <div className="empty-state py-5">
+                        <h3>No categories available</h3>
+                        <p>We could not find category data right now. Please try again after the catalog is populated.</p>
+                    </div>
+                ) : (
+                    <Row className="g-3">
+                        {(categories || []).map((cat, i) => (
+                            <Col xs={6} md={4} lg={3} key={cat._id || cat.slug}>
+                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                                    <Link to={`/books?category=${cat.slug || cat._id}`} style={{ textDecoration: 'none' }}>
+                                        <div className="category-card" style={{ height: '100%' }}>
+                                            <div className="category-card-icon">{cat.icon || '📖'}</div>
+                                            <div className="category-card-name">{cat.name}</div>
+                                            <div className="category-card-count">{cat.bookCount || 0} Books</div>
+                                            {cat.description && <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: 0 }}>{cat.description}</p>}
+                                        </div>
+                                    </Link>
+                                </motion.div>
+                            </Col>
+                        ))}
+                    </Row>
+                )}
             </Container>
         </>
     );
